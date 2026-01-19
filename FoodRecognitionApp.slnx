@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="Core/FoodRecognitionApp.Domain/FoodRecognitionApp.Domain.csproj" />
+    <Project Path="Core/FoodRecognitionApp.Services.Abstraction/FoodRecognitionApp.Services.Abstraction.csproj" />
+    <Project Path="Core/FoodRecognitionApp.Services/FoodRecognitionApp.Services.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/FoodRecognitionApp.Persistence/FoodRecognitionApp.Persistence.csproj" />
+    <Project Path="Infrastructure/FoodRecognitionApp.Presentation/FoodRecognitionApp.Presentation.csproj" />
+  </Folder>
+  <Project Path="FoodRecognitionApp.Shared/FoodRecognitionApp.Shared.csproj" />
+  <Project Path="FoodRecognitionApp.Web/FoodRecognitionApp.Web.csproj" />
+</Solution>
