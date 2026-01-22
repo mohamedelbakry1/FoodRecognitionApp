@@ -3,7 +3,10 @@ using FoodRecognitionApp.Domain.Contracts;
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Persistence;
 using FoodRecognitionApp.Persistence.Data.Contexts;
+using FoodRecognitionApp.Shared.ErrorModels;
+using FoodRecognitionApp.Web.Middlewares;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -36,6 +39,25 @@ namespace FoodRecognitionApp.Web
             }).AddRoles<Role>()
             .AddEntityFrameworkStores<AppDbContext>();
 
+            builder.Services.Configure<ApiBehaviorOptions>(config =>
+            {
+                config.InvalidModelStateResponseFactory = actionContext =>
+                {
+                    var errors = actionContext.ModelState.Where(M => M.Value.Errors.Any())
+                                                         .Select(M => new ValidationError()
+                                                         {
+                                                             Field = M.Key,
+                                                             Errors = M.Value.Errors.Select(E => E.ErrorMessage).ToList()
+                                                         }).ToList();
+
+                    var response = new ValidationErrorResponse()
+                    {
+                        Errors = errors
+                    };
+                    return new BadRequestObjectResult(response);
+                };
+            });
+
             var app = builder.Build();
 
             var scope = app.Services.CreateScope();
@@ -50,9 +72,9 @@ namespace FoodRecognitionApp.Web
                 app.UseSwaggerUI();
             }
 
-
-
             app.UseHttpsRedirection();
+
+            app.UseMiddleware<GlobalErrorHandlingMiddlewares>();
 
             app.UseAuthorization();
             app.UseAuthentication();
