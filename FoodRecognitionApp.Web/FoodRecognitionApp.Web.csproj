@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Middlewares\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Infrastructure\FoodRecognitionApp.Persistence\FoodRecognitionApp.Persistence.csproj" />
     <ProjectReference Include="..\Infrastructure\FoodRecognitionApp.Presentation\FoodRecognitionApp.Presentation.csproj" />
   </ItemGroup>
