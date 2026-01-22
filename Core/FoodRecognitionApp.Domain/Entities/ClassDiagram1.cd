@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="FoodRecognitionApp.Domain.Entities.BaseEntity&lt;T&gt;">
+    <Position X="4.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\BaseEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.Category">
+    <Position X="6.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Category.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.Food">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAACgAAAAAAABQCAACAAIAAgAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Food.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.Image">
+    <Position X="2.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAAAAAAAAAAAAAgIAAAAAACAgAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Image.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.Meal">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAACACAAAAAAAgIAAAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>Entities\Meal.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.UserAccount">
+    <Position X="10.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\UserAccount.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.UserProfile">
+    <Position X="8.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAJAAAAACAAkAAAAAIICAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\UserProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.MealItem">
+    <Position X="12" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAQgAAAAAQAAAAggAAAAA=</HashCode>
+      <FileName>Entities\MealItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FoodRecognitionApp.Domain.Entities.RecognitionResult">
+    <Position X="14" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACCAAAAAAAAAAAAAAAQAAAABEAAAAAAgAAAAA=</HashCode>
+      <FileName>Entities\RecognitionResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="FoodRecognitionApp.Domain.Entities.Enums.MealType">
+    <Position X="2.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAEAAAAAAABAAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>Entities\Enums\MealType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="FoodRecognitionApp.Domain.Entities.Enums.ActivityLevel">
+    <Position X="6" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAkAAAAAAAQBAAAAAAAAAAAAIAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Enums\ActivityLevel.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="FoodRecognitionApp.Domain.Entities.Enums.Gender">
+    <Position X="4.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>Entities\Enums\Gender.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

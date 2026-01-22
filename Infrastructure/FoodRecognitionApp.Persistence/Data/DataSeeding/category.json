@@ -1,0 +1,14 @@
+[
+  { "CategoryName": "Desserts" },
+  { "CategoryName": "Meat" },
+  { "CategoryName": "Pasta & Rice" },
+  { "CategoryName": "Breakfast" },
+  { "CategoryName": "Fried Food" },
+  { "CategoryName": "Salads" },
+  { "CategoryName": "Seafood" },
+  { "CategoryName": "Soups" },
+  { "CategoryName": "Sides & Appetizers" },
+  { "CategoryName": "Main Dish" },
+  { "CategoryName": "Bakery" },
+  { "CategoryName": "Sandwiches" }
+]

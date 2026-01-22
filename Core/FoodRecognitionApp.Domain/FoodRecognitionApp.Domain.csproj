@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\" />
-    <Folder Include="Entities\" />
     <Folder Include="Exceptions\BadRequest\" />
     <Folder Include="Exceptions\UnAuthorized\" />
     <Folder Include="Exceptions\NotFound\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
   </ItemGroup>
 
 </Project>
