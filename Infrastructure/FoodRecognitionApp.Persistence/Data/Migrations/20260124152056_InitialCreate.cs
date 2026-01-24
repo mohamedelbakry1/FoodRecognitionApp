@@ -212,6 +212,9 @@ namespace FoodRecognitionApp.Persistence.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserProfiles", x => x.Id);
+                    table.CheckConstraint("Check_Age_Valid", "Age between 3 and 100");
+                    table.CheckConstraint("Check_Height_Valid", "Height between 100 and 250");
+                    table.CheckConstraint("Check_Weight_Valid", "Weight between 30 and 300");
                     table.ForeignKey(
                         name: "FK_UserProfiles_UserAccounts_AccountId",
                         column: x => x.AccountId,

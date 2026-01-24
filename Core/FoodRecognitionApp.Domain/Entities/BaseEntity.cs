@@ -4,8 +4,8 @@ using System.Text;
 
 namespace FoodRecognitionApp.Domain.Entities
 {
-    public abstract class BaseEntity<TKEy>
+    public abstract class BaseEntity<TKey>
     {
-        public T Id { get; set; }
+        public TKey Id { get; set; }
     }
 }

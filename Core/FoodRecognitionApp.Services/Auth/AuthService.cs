@@ -62,7 +62,8 @@ namespace FoodRecognitionApp.Services.Auth
             {
                 new Claim(ClaimTypes.GivenName, user.UserName ?? ""),
                 new Claim(ClaimTypes.Email, user.Email ?? ""),
-                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? "")
+                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? ""),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
 
             var roles = await _userManager.GetRolesAsync(user);
