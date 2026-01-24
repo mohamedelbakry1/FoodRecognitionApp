@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodRecognitionApp.Persistence.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260121123500_InitialCreate")]
+    [Migration("20260124152056_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -321,7 +321,14 @@ namespace FoodRecognitionApp.Persistence.Data.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.ToTable("UserProfiles");
+                    b.ToTable("UserProfiles", t =>
+                        {
+                            t.HasCheckConstraint("Check_Age_Valid", "Age between 3 and 100");
+
+                            t.HasCheckConstraint("Check_Height_Valid", "Height between 100 and 250");
+
+                            t.HasCheckConstraint("Check_Weight_Valid", "Weight between 30 and 300");
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

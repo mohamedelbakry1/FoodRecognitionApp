@@ -318,7 +318,14 @@ namespace FoodRecognitionApp.Persistence.Data.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.ToTable("UserProfiles");
+                    b.ToTable("UserProfiles", t =>
+                        {
+                            t.HasCheckConstraint("Check_Age_Valid", "Age between 3 and 100");
+
+                            t.HasCheckConstraint("Check_Height_Valid", "Height between 100 and 250");
+
+                            t.HasCheckConstraint("Check_Weight_Valid", "Weight between 30 and 300");
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

@@ -19,6 +19,13 @@ namespace FoodRecognitionApp.Persistence.Data.Configurations
             builder.HasOne(P => P.UserAccount)
                    .WithOne()
                    .HasForeignKey<UserProfile>(P => P.AccountId);
+
+            builder.ToTable(Tb =>
+            {
+                Tb.HasCheckConstraint("Check_Age_Valid", "Age between 3 and 100");
+                Tb.HasCheckConstraint("Check_Height_Valid", "Height between 100 and 250");
+                Tb.HasCheckConstraint("Check_Weight_Valid", "Weight between 30 and 300");
+            });
         }
     }
 }
