@@ -6,7 +6,7 @@
   </Folder>
   <Folder Name="/Infrastructure/">
     <Project Path="Infrastructure/FoodRecognitionApp.Persistence/FoodRecognitionApp.Persistence.csproj" />
-    <Project Path="Infrastructure/FoodRecognitionApp.Presentation/FoodRecognitionApp.Presentation.csproj" />
+    <Project Path="Infrastructure/FoodRecognitionApp.Presentation/FoodRecognitionApp.Presentation.csproj" Id="b2649a58-a61f-4625-909f-a25b75f9432f" />
   </Folder>
   <Project Path="FoodRecognitionApp.Shared/FoodRecognitionApp.Shared.csproj" />
   <Project Path="FoodRecognitionApp.Web/FoodRecognitionApp.Web.csproj" />

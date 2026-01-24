@@ -3,11 +3,17 @@ using FoodRecognitionApp.Domain.Contracts;
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Persistence;
 using FoodRecognitionApp.Persistence.Data.Contexts;
+using FoodRecognitionApp.Services;
+using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Shared;
 using FoodRecognitionApp.Shared.ErrorModels;
 using FoodRecognitionApp.Web.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FoodRecognitionApp.Web
@@ -32,12 +38,16 @@ namespace FoodRecognitionApp.Web
             });
 
             builder.Services.AddScoped<IDbIntializer, DbIntializer>();
+            builder.Services.AddScoped<IServiceManager, ServiceManager>();
+            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
 
             builder.Services.AddIdentityCore<UserAccount>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             }).AddRoles<Role>()
-            .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
 
             builder.Services.Configure<ApiBehaviorOptions>(config =>
             {
@@ -55,6 +65,26 @@ namespace FoodRecognitionApp.Web
                         Errors = errors
                     };
                     return new BadRequestObjectResult(response);
+                };
+            });
+
+            var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey))
                 };
             });
 
@@ -76,8 +106,8 @@ namespace FoodRecognitionApp.Web
 
             app.UseMiddleware<GlobalErrorHandlingMiddlewares>();
 
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
 
             app.MapControllers();
