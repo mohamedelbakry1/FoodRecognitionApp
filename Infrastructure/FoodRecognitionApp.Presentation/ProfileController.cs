@@ -26,5 +26,17 @@ namespace FoodRecognitionApp.Presentation
             var result = await _serviceManager.ProfileService.CreateProfileAsync(userId, request);
             return Ok(result);
         }
+
+        [Authorize]
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateProfile(CreateProfileRequest request)
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdString == null) throw new UnAuthorizedException("You are Not Authorized ");
+            var userId = int.Parse(userIdString);
+
+            await _serviceManager.ProfileService.UpdateProfileAsync(userId, request);
+            return Ok("Profile Updated Successfully");
+        }
     }
 }

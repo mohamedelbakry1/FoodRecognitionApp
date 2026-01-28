@@ -2,7 +2,9 @@
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Domain.Entities.Enums;
 using FoodRecognitionApp.Domain.Exceptions.BadRequest;
+using FoodRecognitionApp.Domain.Exceptions.NotFound;
 using FoodRecognitionApp.Services.Abstraction.Profile;
+using FoodRecognitionApp.Services.Specifications;
 using FoodRecognitionApp.Shared.Dtos.Profile;
 using System;
 using System.Collections.Generic;
@@ -66,6 +68,55 @@ namespace FoodRecognitionApp.Services.Profile
                 AMR = amr,
                 DailyCaloriesTarget = dailyCalories
             };
+
+        }
+
+        public async Task UpdateProfileAsync(int userId, CreateProfileRequest request)
+        {
+            var spec = new ProfileByUserIdSpecification(userId);
+
+            var profile = await _unitOfWork.GetRepository<int, UserProfile>().GetById(spec);
+
+            if(profile == null) throw new ProfileNotFoundException(profile.UserAccount.Email);
+
+            profile.Age = request.Age;
+            profile.Weight = request.Weight;
+            profile.Height = request.Height;
+            profile.Gender = request.Gender;
+            profile.ActivityLevel = request.ActivityLevel;
+            profile.GoalType = request.GoalType;
+
+
+            // 1. Calculate BMR
+            decimal bmr = 0;
+            if (request.Gender == Gender.Male)
+                bmr = (10 * request.Weight) + (6.25m * request.Height) - (5 * request.Age) + 5;
+            else
+                bmr = (10 * request.Weight) + (6.25m * request.Height) - (5 * request.Age) - 161;
+
+            // 2. Calculate AMR
+            decimal activityMultiplier = request.ActivityLevel switch
+            {
+                ActivityLevel.Sedentary => 1.2m,
+                ActivityLevel.LightlyActive => 1.375m,
+                ActivityLevel.ModeratelyActive => 1.55m,
+                ActivityLevel.VeryActive => 1.725m,
+                ActivityLevel.ExtraActive => 1.9m,
+                _ => 1.2m
+            };
+
+            decimal amr = bmr * activityMultiplier;
+
+            // 3. Calculate Daily Target based on Goal
+            profile.Daily_Calories = request.GoalType switch
+            {
+                GoalType.LoseWeight => amr - 500,
+                GoalType.GainWeight => amr + 500,
+                _ => amr // Maintain
+            };
+
+            _unitOfWork.GetRepository<int, UserProfile>().Update(profile);
+            await _unitOfWork.SaveChangesAsync();
 
         }
     }

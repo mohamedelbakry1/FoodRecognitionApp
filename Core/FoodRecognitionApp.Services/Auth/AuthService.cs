@@ -56,6 +56,19 @@ namespace FoodRecognitionApp.Services.Auth
             };
         }
 
+        public async Task<UserResponse?> GetCurrentUserAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null) throw new UserNotFoundException(email);
+
+            return new UserResponse()
+            {
+                UserName = user.UserName ?? "",
+                Email = user.Email ?? "",
+                Token = await GenerateTokenAsync(user),
+            };
+        }
+
         private async Task<string> GenerateTokenAsync(UserAccount user)
         {
             var authClaims = new List<Claim>()
