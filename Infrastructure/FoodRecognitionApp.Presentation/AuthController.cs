@@ -1,9 +1,11 @@
 ﻿using FoodRecognitionApp.Services.Abstraction;
 using FoodRecognitionApp.Shared.Dtos.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 using System.Text;
 
 namespace FoodRecognitionApp.Presentation
@@ -23,6 +25,15 @@ namespace FoodRecognitionApp.Presentation
         public async Task<IActionResult> Register(RegisterRequest request)
         {
             var result = await _serviceManager.AuthService.RegisterAsync(request);
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var email = User.FindFirst(ClaimTypes.Email);
+            var result = await _serviceManager.AuthService.GetCurrentUserAsync(email.Value);
             return Ok(result);
         }
     }
