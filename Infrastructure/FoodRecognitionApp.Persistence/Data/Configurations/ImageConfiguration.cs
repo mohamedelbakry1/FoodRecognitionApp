@@ -11,7 +11,7 @@ namespace FoodRecognitionApp.Persistence.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Image> builder)
         {
-            builder.Property(I => I.ImageUrl).HasColumnType("varchar");
+            builder.Property(I => I.ImageUrl).HasColumnType("varchar").HasMaxLength(1000);
 
             builder.Property(I => I.UploadTime).HasDefaultValueSql("GETDATE()");
 

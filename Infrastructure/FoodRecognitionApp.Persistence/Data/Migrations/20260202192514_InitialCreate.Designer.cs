@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodRecognitionApp.Persistence.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260124152056_InitialCreate")]
+    [Migration("20260202192514_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -92,6 +92,7 @@ namespace FoodRecognitionApp.Persistence.Data.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
+                        .HasMaxLength(1000)
                         .HasColumnType("varchar");
 
                     b.Property<DateTime>("UploadTime")
