@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Infrastructure\FoodRecognitionApp.Presentation\FoodRecognitionApp.Presentation.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
 </Project>

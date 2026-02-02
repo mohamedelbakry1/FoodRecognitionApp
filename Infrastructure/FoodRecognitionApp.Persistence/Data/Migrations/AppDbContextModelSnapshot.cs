@@ -89,6 +89,7 @@ namespace FoodRecognitionApp.Persistence.Data.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
+                        .HasMaxLength(1000)
                         .HasColumnType("varchar");
 
                     b.Property<DateTime>("UploadTime")
