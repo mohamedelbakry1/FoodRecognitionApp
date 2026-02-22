@@ -5,6 +5,8 @@ using FoodRecognitionApp.Persistence;
 using FoodRecognitionApp.Persistence.Data.Contexts;
 using FoodRecognitionApp.Services;
 using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Services.Abstraction.AttachmentService;
+using FoodRecognitionApp.Services.AttachmentService;
 using FoodRecognitionApp.Shared;
 using FoodRecognitionApp.Shared.ErrorModels;
 using FoodRecognitionApp.Web.Middlewares;
@@ -45,6 +47,7 @@ namespace FoodRecognitionApp.Web
             builder.Services.AddScoped<IDbIntializer, DbIntializer>();
             builder.Services.AddScoped<IServiceManager, ServiceManager>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IAttachmentService, AttachmentService>();
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
 
             builder.Services.AddIdentityCore<UserAccount>(options =>
