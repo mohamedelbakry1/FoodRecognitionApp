@@ -2,6 +2,7 @@
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Domain.Exceptions.BadRequest;
 using FoodRecognitionApp.Domain.Exceptions.NotFound;
+using FoodRecognitionApp.Services.Abstraction.AttachmentService;
 using FoodRecognitionApp.Services.Abstraction.FoodRecognition;
 using FoodRecognitionApp.Services.Specifications;
 using FoodRecognitionApp.Shared.Dtos.FoodRecognition;
@@ -15,14 +16,16 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 {
     public class FoodRecognitionService
         (IUnitOfWork _unitOfWork,
-        IWebHostEnvironment _webHostEnvironment
+        IAttachmentService _attachmentService
         ) : IFoodRecognitionService
     {
         public async Task<FoodRecognitionResponse?> RecognizeFoodAsync(int userId, FoodRecognitionRequest request)
         {
             if (request.Image is null || request.Image.Length == 0) throw new UploadImageBadRequestException();
 
-            var imageUrl = await SaveImageAsync(request.Image);
+            var imageUrl = await _attachmentService.Upload("images", request.Image);
+
+            if (imageUrl is null) throw new UploadImageBadRequestException();
 
             var image = new Image()
             {
@@ -38,7 +41,7 @@ namespace FoodRecognitionApp.Services.FoodRecognition
             var foodSpec = new FoodByNameSpecification(aiResponse.FoodName);
             var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodSpec);
 
-            if(food is null) throw new FoodNotFoundException(aiResponse.FoodName);
+            if (food is null) throw new FoodNotFoundException(aiResponse.FoodName);
 
             var recognitionResult = new RecognitionResult()
             {
@@ -50,7 +53,9 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 
             image.RecognitionResults = new List<RecognitionResult> { recognitionResult };
 
-            await _unitOfWork.SaveChangesAsync();
+            var IsCreated = await _unitOfWork.SaveChangesAsync() > 0;
+
+            if (!IsCreated) _attachmentService.Delete("images", imageUrl);
 
             return new FoodRecognitionResponse
             {
@@ -62,26 +67,6 @@ namespace FoodRecognitionApp.Services.FoodRecognition
                 CategoryName = food.CategoryFood.CategoryName,
                 Confidence_Score = aiResponse.Confidence_Score,
             };
-        }
-
-
-        private async Task<string> SaveImageAsync(IFormFile imageFile)
-        {
-            var uploadFolder = Path.Combine(_webHostEnvironment.WebRootPath,"images");
-
-            if (!Directory.Exists(uploadFolder))
-            {
-                Directory.CreateDirectory(uploadFolder);
-            }
-
-            var UniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
-
-            var filePath = Path.Combine(uploadFolder, UniqueFileName);
-
-            using var fileStream = new FileStream(filePath, FileMode.Create);
-            await imageFile.CopyToAsync(fileStream);
-
-            return $"/images/{UniqueFileName}";
         }
 
         private AIModelResponse GetAiResponse()
