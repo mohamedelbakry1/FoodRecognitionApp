@@ -82,8 +82,7 @@ namespace FoodRecognitionApp.Services.Profile
                 ActivityLevel.Sedentary => 1.2m,
                 ActivityLevel.LightlyActive => 1.375m,
                 ActivityLevel.ModeratelyActive => 1.55m,
-                ActivityLevel.VeryActive => 1.725m,
-                ActivityLevel.ExtraActive => 1.9m,
+                ActivityLevel.HighlyActive => 1.725m,
                 _ => 1.2m
             };
 
