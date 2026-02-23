@@ -8,8 +8,7 @@ namespace FoodRecognitionApp.Domain.Entities.Enums
     {
         Sedentary = 1,
         LightlyActive,
-        ModeratelyActive, 
-        VeryActive,     
-        ExtraActive
+        ModeratelyActive,
+        HighlyActive
     }
 }
