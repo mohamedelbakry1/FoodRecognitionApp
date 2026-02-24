@@ -1,6 +1,7 @@
 ﻿using FoodRecognitionApp.Domain.Contracts;
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Services.Abstraction.AIModel;
 using FoodRecognitionApp.Services.Abstraction.AttachmentService;
 using FoodRecognitionApp.Services.Abstraction.Auth;
 using FoodRecognitionApp.Services.Abstraction.FoodRecognition;
@@ -22,6 +23,7 @@ namespace FoodRecognitionApp.Services
         (
             IUnitOfWork _unitOfWork,
             IAttachmentService _attachmentService,
+            IAIModelService _aIModelService,
             UserManager<UserAccount> _userManager,
             IOptions<JwtOptions> options
         ) : IServiceManager
@@ -30,6 +32,6 @@ namespace FoodRecognitionApp.Services
 
         public IProfileService ProfileService { get; } = new ProfileService(_unitOfWork);
 
-        public IFoodRecognitionService FoodRecognitionService { get; } = new FoodRecognitionService(_unitOfWork, _attachmentService);
+        public IFoodRecognitionService FoodRecognitionService { get; } = new FoodRecognitionService(_unitOfWork, _attachmentService,_aIModelService);
     }
 }

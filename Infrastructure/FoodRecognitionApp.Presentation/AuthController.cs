@@ -33,7 +33,7 @@ namespace FoodRecognitionApp.Presentation
         public async Task<IActionResult> GetCurrentUser()
         {
             var email = User.FindFirst(ClaimTypes.Email);
-            var result = await _serviceManager.AuthService.GetCurrentUserAsync(email.Value);
+            var result = await _serviceManager.AuthService.GetCurrentUserAsync(email!.Value);
             return Ok(result);
         }
     }

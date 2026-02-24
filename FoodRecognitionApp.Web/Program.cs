@@ -5,7 +5,9 @@ using FoodRecognitionApp.Persistence;
 using FoodRecognitionApp.Persistence.Data.Contexts;
 using FoodRecognitionApp.Services;
 using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Services.Abstraction.AIModel;
 using FoodRecognitionApp.Services.Abstraction.AttachmentService;
+using FoodRecognitionApp.Services.AIModel;
 using FoodRecognitionApp.Services.AttachmentService;
 using FoodRecognitionApp.Shared;
 using FoodRecognitionApp.Shared.ErrorModels;
@@ -62,11 +64,11 @@ namespace FoodRecognitionApp.Web
             {
                 config.InvalidModelStateResponseFactory = actionContext =>
                 {
-                    var errors = actionContext.ModelState.Where(M => M.Value.Errors.Any())
+                    var errors = actionContext.ModelState.Where(M => M.Value!.Errors.Any())
                                                          .Select(M => new ValidationError()
                                                          {
                                                              Field = M.Key,
-                                                             Errors = M.Value.Errors.Select(E => E.ErrorMessage).ToList()
+                                                             Errors = M.Value!.Errors.Select(E => E.ErrorMessage).ToList()
                                                          }).ToList();
 
                     var response = new ValidationErrorResponse()
@@ -88,7 +90,7 @@ namespace FoodRecognitionApp.Web
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = jwtOptions.Issuer,
+                    ValidIssuer = jwtOptions!.Issuer,
                     ValidateAudience = true,
                     ValidAudience = jwtOptions.Audience,
                     ValidateLifetime = true,
@@ -103,6 +105,13 @@ namespace FoodRecognitionApp.Web
                 {
                     policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                 });
+            });
+
+            builder.Services.AddHttpClient<IAIModelService, AIModelService>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration["AiModel:BaseUrl"]!);
+                client.Timeout = TimeSpan.FromSeconds(
+                    int.Parse(builder.Configuration["AiModel:TimeoutSeconds"]!));
             });
 
             var app = builder.Build();
