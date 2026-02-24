@@ -2,6 +2,7 @@
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Domain.Exceptions.BadRequest;
 using FoodRecognitionApp.Domain.Exceptions.NotFound;
+using FoodRecognitionApp.Services.Abstraction.AIModel;
 using FoodRecognitionApp.Services.Abstraction.AttachmentService;
 using FoodRecognitionApp.Services.Abstraction.FoodRecognition;
 using FoodRecognitionApp.Services.Specifications;
@@ -16,7 +17,8 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 {
     public class FoodRecognitionService
         (IUnitOfWork _unitOfWork,
-        IAttachmentService _attachmentService
+        IAttachmentService _attachmentService,
+        IAIModelService _aiModelService
         ) : IFoodRecognitionService
     {
         public async Task<FoodRecognitionResponse?> RecognizeFoodAsync(int userId, FoodRecognitionRequest request)
@@ -36,9 +38,9 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 
             await _unitOfWork.GetRepository<int, Image>().AddAsync(image);
 
-            var aiResponse = GetAiResponse();
+            var aiResponse = await _aiModelService.ClassifyFoodAsync(request.Image);
 
-            var foodSpec = new FoodByNameSpecification(aiResponse.FoodName);
+            var foodSpec = new FoodByNameSpecification(aiResponse!.FoodName);
             var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodSpec);
 
             if (food is null) throw new FoodNotFoundException(aiResponse.FoodName);
