@@ -26,8 +26,8 @@ namespace FoodRecognitionApp.Shared.Dtos.Profile
         ErrorMessage = "Goal type must be MaintainWeight, LoseWeight, or GainWeight")]
         public GoalType GoalType { get; set; }
         [Required(ErrorMessage = "Activity level is required")]
-        [RegularExpression("^(Sedentary|LightlyActive|ModeratelyActive|ExtraActive|VeryActive)$",
-        ErrorMessage = "Activity level must be Sedentary, LightlyActive, ModeratelyActive, ExtraActive, or VeryActive")]
+        [RegularExpression("^(Sedentary|LightlyActive|ModeratelyActive|HighlyActive)$",
+        ErrorMessage = "Activity level must be Sedentary, LightlyActive, ModeratelyActive, or HighlyActive")]
         public ActivityLevel ActivityLevel { get; set; }
     }
 }
