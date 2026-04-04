@@ -11,6 +11,7 @@ using FoodRecognitionApp.Services.FoodRecognition;
 using FoodRecognitionApp.Services.Profile;
 using FoodRecognitionApp.Shared;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
@@ -25,6 +26,7 @@ namespace FoodRecognitionApp.Services
             IAttachmentService _attachmentService,
             IAIModelService _aIModelService,
             UserManager<UserAccount> _userManager,
+            IHttpContextAccessor _httpContextAccessor,
             IOptions<JwtOptions> options
         ) : IServiceManager
     {
@@ -32,6 +34,6 @@ namespace FoodRecognitionApp.Services
 
         public IProfileService ProfileService { get; } = new ProfileService(_unitOfWork);
 
-        public IFoodRecognitionService FoodRecognitionService { get; } = new FoodRecognitionService(_unitOfWork, _attachmentService,_aIModelService);
+        public IFoodRecognitionService FoodRecognitionService { get; } = new FoodRecognitionService(_unitOfWork, _attachmentService,_aIModelService,_httpContextAccessor);
     }
 }

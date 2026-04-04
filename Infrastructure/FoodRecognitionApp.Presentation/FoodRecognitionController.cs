@@ -27,5 +27,16 @@ namespace FoodRecognitionApp.Presentation
             var result = await _serviceManager.FoodRecognitionService.RecognizeFoodAsync(userId, request);
             return Ok(result);
         }
+
+        [HttpGet("recent")]
+        public async Task<IActionResult> GetRecentRecogntions()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim is null) throw new UnAuthorizedException("You are not Authorized");
+            var userId = int.Parse(userIdClaim.Value);
+
+            var result = await _serviceManager.FoodRecognitionService.GetRecentRecognitionsAsync(userId);
+            return Ok(result);
+        }
     }
 }

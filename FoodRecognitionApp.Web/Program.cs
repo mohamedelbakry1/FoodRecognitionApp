@@ -50,6 +50,7 @@ namespace FoodRecognitionApp.Web
             builder.Services.AddScoped<IServiceManager, ServiceManager>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
 
             builder.Services.AddIdentityCore<UserAccount>(options =>
@@ -131,6 +132,7 @@ namespace FoodRecognitionApp.Web
             app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseMiddleware<GlobalErrorHandlingMiddlewares>();
 
