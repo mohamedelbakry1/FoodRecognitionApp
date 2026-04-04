@@ -18,9 +18,40 @@ namespace FoodRecognitionApp.Services.FoodRecognition
     public class FoodRecognitionService
         (IUnitOfWork _unitOfWork,
         IAttachmentService _attachmentService,
-        IAIModelService _aiModelService
+        IAIModelService _aiModelService,
+        IHttpContextAccessor _httpContextAccessor
         ) : IFoodRecognitionService
     {
+        public async Task<IEnumerable<RecentRecognitionResponse>> GetRecentRecognitionsAsync(int userId)
+        {
+            var baseUrl = GetBaseUrl();
+            var spec = new RecentFoodImagesSpecification(userId);
+
+            var images = await _unitOfWork.GetRepository<int, Image>().GetAllAsync(spec);
+
+            var result = new List<RecentRecognitionResponse>();
+
+            foreach(var image in images)
+            {
+                var recognition = image.RecognitionResults.FirstOrDefault();
+                if (recognition is null) throw new RecognitionResultNotFoundException();
+
+                var foodspec = new FoodByIdSpecification(recognition.FoodId);
+                var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodspec);
+
+                if (food is null) throw new FoodNotFoundException(food!.Name);
+
+                result.Add(new RecentRecognitionResponse
+                {
+                    FoodName = food.Name,
+                    ImageUrl = $"{baseUrl}/images/{image.ImageUrl}",
+                    UploadTime = image.UploadTime
+                });
+            }
+
+            return result;
+        }
+
         public async Task<FoodRecognitionResponse?> RecognizeFoodAsync(int userId, FoodRecognitionRequest request)
         {
             if (request.Image is null || request.Image.Length == 0) throw new UploadImageBadRequestException();
@@ -74,7 +105,7 @@ namespace FoodRecognitionApp.Services.FoodRecognition
         private AIModelResponse GetAiResponse()
         {
             var ranFoods = new[]
-{
+            {
                 new { Name = "Pizza", Confidence = 0.95 },
                 new { Name = "Hamburger", Confidence = 0.89 },
                 new { Name = "Sushi", Confidence = 0.92 },
@@ -88,6 +119,12 @@ namespace FoodRecognitionApp.Services.FoodRecognition
                 FoodName = selected.Name,
                 Confidence_Score = selected.Confidence
             };
+        }
+
+        private string GetBaseUrl()
+        {
+            var request = _httpContextAccessor.HttpContext!.Request;
+            return $"{request.Scheme}://{request.Host}";
         }
     }
 }
