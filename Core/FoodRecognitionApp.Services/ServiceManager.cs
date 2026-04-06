@@ -4,6 +4,7 @@ using FoodRecognitionApp.Services.Abstraction;
 using FoodRecognitionApp.Services.Abstraction.AIModel;
 using FoodRecognitionApp.Services.Abstraction.AttachmentService;
 using FoodRecognitionApp.Services.Abstraction.Auth;
+using FoodRecognitionApp.Services.Abstraction.Email;
 using FoodRecognitionApp.Services.Abstraction.FoodRecognition;
 using FoodRecognitionApp.Services.Abstraction.Profile;
 using FoodRecognitionApp.Services.Auth;
@@ -13,6 +14,7 @@ using FoodRecognitionApp.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -27,10 +29,12 @@ namespace FoodRecognitionApp.Services
             IAIModelService _aIModelService,
             UserManager<UserAccount> _userManager,
             IHttpContextAccessor _httpContextAccessor,
-            IOptions<JwtOptions> options
+            IOptions<JwtOptions> options,
+            IEmailService emailService,
+            IMemoryCache memoryCache
         ) : IServiceManager
     {
-        public IAuthService AuthService { get; } = new AuthService(_userManager, options);
+        public IAuthService AuthService { get; } = new AuthService(_userManager, options,emailService,memoryCache);
 
         public IProfileService ProfileService { get; } = new ProfileService(_unitOfWork);
 

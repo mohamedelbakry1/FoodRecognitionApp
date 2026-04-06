@@ -19,10 +19,7 @@ namespace FoodRecognitionApp.Presentation
         [HttpPost("recognize")]
         public async Task<IActionResult> RecognizeFood(FoodRecognitionRequest request)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim is null) throw new UnAuthorizedException("You are not Authorized");
-
-            var userId = int.Parse(userIdClaim.Value);
+            var userId = GetCurrentUserId();
 
             var result = await _serviceManager.FoodRecognitionService.RecognizeFoodAsync(userId, request);
             return Ok(result);
@@ -31,12 +28,18 @@ namespace FoodRecognitionApp.Presentation
         [HttpGet("recent")]
         public async Task<IActionResult> GetRecentRecogntions()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim is null) throw new UnAuthorizedException("You are not Authorized");
-            var userId = int.Parse(userIdClaim.Value);
+            var userId = GetCurrentUserId();
 
             var result = await _serviceManager.FoodRecognitionService.GetRecentRecognitionsAsync(userId);
             return Ok(result);
+        }
+
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim is null) throw new UnAuthorizedException("You are not Authorized");
+            return int.Parse(userIdClaim.Value);
         }
     }
 }

@@ -22,6 +22,7 @@ namespace FoodRecognitionApp.Services.FoodRecognition
         IHttpContextAccessor _httpContextAccessor
         ) : IFoodRecognitionService
     {
+        private const string ImageFolderName = "images";
         public async Task<IEnumerable<RecentRecognitionResponse>> GetRecentRecognitionsAsync(int userId)
         {
             var baseUrl = GetBaseUrl();
@@ -56,7 +57,7 @@ namespace FoodRecognitionApp.Services.FoodRecognition
         {
             if (request.Image is null || request.Image.Length == 0) throw new UploadImageBadRequestException();
 
-            var imageUrl = await _attachmentService.Upload("images", request.Image);
+            var imageUrl = await _attachmentService.Upload(ImageFolderName, request.Image);
 
             if (imageUrl is null) throw new UploadImageBadRequestException();
 
@@ -88,7 +89,7 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 
             var IsCreated = await _unitOfWork.SaveChangesAsync() > 0;
 
-            if (!IsCreated) _attachmentService.Delete("images", imageUrl);
+            if (!IsCreated) _attachmentService.Delete(ImageFolderName, imageUrl);
 
             return new FoodRecognitionResponse
             {
@@ -102,24 +103,24 @@ namespace FoodRecognitionApp.Services.FoodRecognition
             };
         }
 
-        private AIModelResponse GetAiResponse()
-        {
-            var ranFoods = new[]
-            {
-                new { Name = "Pizza", Confidence = 0.95 },
-                new { Name = "Hamburger", Confidence = 0.89 },
-                new { Name = "Sushi", Confidence = 0.92 },
-                new { Name = "Ice Cream", Confidence = 0.88 },
-                new { Name = "French Fries", Confidence = 0.91 }
-            };
-            var random = new Random();
-            var selected = ranFoods[random.Next(ranFoods.Length)];
-            return new AIModelResponse
-            {
-                FoodName = selected.Name,
-                Confidence_Score = selected.Confidence
-            };
-        }
+        //private AIModelResponse GetAiResponse()
+        //{
+        //    var ranFoods = new[]
+        //    {
+        //        new { Name = "Pizza", Confidence = 0.95 },
+        //        new { Name = "Hamburger", Confidence = 0.89 },
+        //        new { Name = "Sushi", Confidence = 0.92 },
+        //        new { Name = "Ice Cream", Confidence = 0.88 },
+        //        new { Name = "French Fries", Confidence = 0.91 }
+        //    };
+        //    var random = new Random();
+        //    var selected = ranFoods[random.Next(ranFoods.Length)];
+        //    return new AIModelResponse
+        //    {
+        //        FoodName = selected.Name,
+        //        Confidence_Score = selected.Confidence
+        //    };
+        //}
 
         private string GetBaseUrl()
         {

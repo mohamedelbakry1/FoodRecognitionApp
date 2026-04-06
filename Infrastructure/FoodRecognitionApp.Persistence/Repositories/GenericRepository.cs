@@ -12,7 +12,8 @@ namespace FoodRecognitionApp.Persistence.Repositories
     {
         public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecification<TKey, TEntity> spec, bool changeTracker = false)
         {
-            return await ApplySpecifications(spec).ToListAsync();
+            return changeTracker ? await ApplySpecifications(spec).ToListAsync() : 
+                                   await ApplySpecifications(spec).AsNoTracking().ToListAsync();
         }
 
         public async Task<TEntity?> GetById(ISpecification<TKey, TEntity> spec)

@@ -7,9 +7,12 @@ using FoodRecognitionApp.Services;
 using FoodRecognitionApp.Services.Abstraction;
 using FoodRecognitionApp.Services.Abstraction.AIModel;
 using FoodRecognitionApp.Services.Abstraction.AttachmentService;
+using FoodRecognitionApp.Services.Abstraction.Email;
 using FoodRecognitionApp.Services.AIModel;
 using FoodRecognitionApp.Services.AttachmentService;
+using FoodRecognitionApp.Services.Email;
 using FoodRecognitionApp.Shared;
+using FoodRecognitionApp.Shared.Dtos.Email;
 using FoodRecognitionApp.Shared.ErrorModels;
 using FoodRecognitionApp.Web.Middlewares;
 using Microsoft.AspNetCore.Identity;
@@ -51,7 +54,11 @@ namespace FoodRecognitionApp.Web
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddMemoryCache();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
             builder.Services.AddIdentityCore<UserAccount>(options =>
             {
