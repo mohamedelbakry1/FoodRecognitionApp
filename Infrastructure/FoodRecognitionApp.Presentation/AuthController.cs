@@ -28,6 +28,27 @@ namespace FoodRecognitionApp.Presentation
             return Ok(result);
         }
 
+        [HttpPost("forgotpassword")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+        {
+            await _serviceManager.AuthService.ForgotPasswordAsync(request);
+            return Ok();
+        }
+
+        [HttpPost("verifyotp")]
+        public async Task<IActionResult> VerifyOtp(VerifyOtpRequest request)
+        {
+            var result = _serviceManager.AuthService.VerifyOtp(request);
+            return Ok(result);
+        }
+
+        [HttpPost("resetpassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        {
+            await _serviceManager.AuthService.ResetPasswordAsync(request);
+            return Ok();
+        }
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetCurrentUser()

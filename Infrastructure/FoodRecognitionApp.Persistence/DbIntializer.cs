@@ -19,16 +19,14 @@ namespace FoodRecognitionApp.Persistence
     {
         public async Task IntializeAsync() 
         {
-            if (_context.Database.GetPendingMigrationsAsync().GetAwaiter().GetResult().Any())
+            if ((await _context.Database.GetPendingMigrationsAsync()).Any())
             {
                 await _context.Database.MigrateAsync();
             }
 
             if (!_context.Categories.Any())
             {
-                var categoriesdata = await File.ReadAllTextAsync(@"..\Infrastructure\FoodRecognitionApp.Persistence\Data\DataSeeding\category.json");
-
-                var categories = JsonSerializer.Deserialize<List<Category>>(categoriesdata);
+                var categories = await LoadDataFromJsonAsync<Category>("category.json");
 
                 if(categories is not null && categories.Count > 0)
                 {
@@ -38,9 +36,7 @@ namespace FoodRecognitionApp.Persistence
 
             if (!_context.Foods.Any())
             {
-                var foodsdata = await File.ReadAllTextAsync(@"..\Infrastructure\FoodRecognitionApp.Persistence\Data\DataSeeding\food.json");
-
-                var foods = JsonSerializer.Deserialize<List<Food>>(foodsdata);
+                var foods = await LoadDataFromJsonAsync<Food>("food.json");
 
                 if(foods is not null && foods.Count > 0)
                 {
@@ -78,6 +74,21 @@ namespace FoodRecognitionApp.Persistence
             }
             // ..\Infrastructure\FoodRecognitionApp.Persistence\Data\DataSeeding\food.json
             await _context.SaveChangesAsync();
+        }
+
+        private static async Task<List<T>> LoadDataFromJsonAsync<T>(string fileName)
+        {
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\Files", fileName);
+            if (!File.Exists(filePath)) throw new FileNotFoundException($"Seeding file '{fileName}' was not found at: {filePath}");
+
+            var Data = await File.ReadAllTextAsync(filePath);
+
+            var Options = new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            return JsonSerializer.Deserialize<List<T>>(Data, Options) ?? new List<T>();
         }
     }
 }
