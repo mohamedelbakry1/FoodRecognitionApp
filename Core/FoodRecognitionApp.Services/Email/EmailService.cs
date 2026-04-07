@@ -1,11 +1,9 @@
 ﻿using FoodRecognitionApp.Services.Abstraction.Email;
 using FoodRecognitionApp.Shared.Dtos.Email;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Mail;
-using System.Text;
+using MimeKit;
 
 namespace FoodRecognitionApp.Services.Email
 {
@@ -15,28 +13,27 @@ namespace FoodRecognitionApp.Services.Email
         {
             var settings = _options.Value;
 
-            var smtpClient = new SmtpClient(settings.Host)
-            {
-                Port = settings.Port,
-                Credentials = new NetworkCredential(settings.Email, settings.Password),
-                EnableSsl = true
-            };
+            var message = new MimeMessage();
 
-            var mailMessage = new MailMessage()
+            message.From.Add(new MailboxAddress(settings.DisplayName, settings.Email));
+            message.To.Add(MailboxAddress.Parse(email));
+            message.Subject = "FoodRecognitionApp - Password Reset OTP";
+            message.Body = new TextPart("html")
             {
-                From = new MailAddress(settings.Email, settings.DisplayName),
-                Subject = "FoodRecognitionApp - Reset Password OTP",
-                Body = $@"
+                Text = $@"
                     <h2>Password Reset Request</h2>
                     <p>Your OTP code is:</p>
                     <h1 style='color: #4CAF50; letter-spacing: 5px;'>{otp}</h1>
                     <p>This OTP is valid for <strong>10 minutes</strong>.</p>
-                    <p>If you didn't request this, please ignore this email.</p>",
-                IsBodyHtml = true,
+                    <p>If you didn't request this, please ignore this email.</p>"
             };
 
-            mailMessage.To.Add(email);
-            await smtpClient.SendMailAsync(mailMessage);
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync(settings.Host, settings.Port, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(settings.Email, settings.Password);
+            await smtp.SendAsync(message);
+            await smtp.DisconnectAsync(true);
+
         }
     }
 }
