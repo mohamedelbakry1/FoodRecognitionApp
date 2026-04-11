@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FoodRecognitionApp.Shared.Dtos.FoodRecognition
+namespace FoodRecognitionApp.Shared.Dtos.Meal
 {
-    public class FoodRecognitionResponse
+    public class FoodItemResponse
     {
         public int FoodId { get; set; }
-        public string FoodName { get; set; } = null!;
+        public string Name { get; set; } = null!;
         public decimal Calories { get; set; }
         public decimal Carbs { get; set; }
+        public decimal Protein { get; set; }
         public decimal Fats { get; set; }
-        public decimal Protien { get; set; }
         public string CategoryName { get; set; } = null!;
-        public double Confidence_Score { get; set; }
     }
 }
