@@ -13,9 +13,9 @@ namespace FoodRecognitionApp.Presentation
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProfileController(IServiceManager _serviceManager) : ControllerBase
     {
-        [Authorize]
         [HttpPost("setup")]
         public async Task<IActionResult> CreateProfile(CreateProfileRequest request)
         {
@@ -27,7 +27,7 @@ namespace FoodRecognitionApp.Presentation
             return Ok(result);
         }
 
-        [Authorize]
+
         [HttpPut("update")]
         public async Task<IActionResult> UpdateProfile(CreateProfileRequest request)
         {

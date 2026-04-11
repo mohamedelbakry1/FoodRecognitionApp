@@ -93,6 +93,7 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 
             return new FoodRecognitionResponse
             {
+                FoodId = food.Id,
                 FoodName = food.Name,
                 Calories = food.Calories,
                 Carbs = food.Carbs,
