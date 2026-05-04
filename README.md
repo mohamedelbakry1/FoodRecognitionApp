@@ -46,7 +46,7 @@ The system integrates with an external **AI classification model** hosted on Hug
 |---------|-------------|
 | 🤖 **AI Food Recognition** | Upload a food image and get instant recognition with confidence scores & nutrition info |
 | 🔐 **Authentication & Authorization** | Full JWT-based auth system with register, login, and role-based access |
-| 🔑 **Password Recovery** | OTP-based forgot password flow with email verification via SendGrid |
+| 🔑 **Password Recovery** | OTP-based forgot password flow with email verification via MailKit (SMTP) |
 | 👤 **User Profiles** | Health profile setup with age, weight, height, gender, activity level & fitness goals |
 | 🍽️ **Meal Logging** | Log meals with multiple food items and automatic calorie calculation |
 | 📊 **Daily Summary** | Get daily nutritional summary with total calories, protein, carbs & fats |
@@ -115,7 +115,7 @@ The project follows **Clean Architecture** principles with clear separation of c
 | **Database** | SQL Server |
 | **Authentication** | ASP.NET Core Identity + JWT Bearer Tokens |
 | **AI Integration** | External AI Model API (Hugging Face Spaces) |
-| **Email Service** | SendGrid API |
+| **Email Service** | MailKit (SMTP) |
 | **API Docs** | Swagger / OpenAPI |
 | **Architecture** | Clean Architecture |
 
@@ -148,7 +148,7 @@ FoodRecognitionApp/
 │       ├── Meals/                           # Meal logging & tracking
 │       ├── Profile/                         # User profile management
 │       ├── AIModel/                         # AI model HTTP client
-│       ├── Email/                           # SendGrid email integration
+│       ├── Email/                           # MailKit SMTP email integration
 │       └── Specifications/                  # Query specifications
 │
 ├── Infrastructure/
@@ -264,39 +264,39 @@ erDiagram
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| `POST` | `/api/Auth/register` | Register a new user account | ❌ |
-| `POST` | `/api/Auth/login` | Login and receive JWT token | ❌ |
-| `GET` | `/api/Auth` | Get current authenticated user | ✅ |
-| `POST` | `/api/Auth/forgot-password` | Request OTP for password reset | ❌ |
-| `POST` | `/api/Auth/verify-otp` | Verify OTP code | ❌ |
-| `POST` | `/api/Auth/reset-password` | Reset password with OTP | ❌ |
+| `POST` | `/api/Auth/register` | Register a new user account | No |
+| `POST` | `/api/Auth/login` | Login and receive JWT token | No |
+| `GET` | `/api/Auth` | Get current authenticated user | Yes 🔒 |
+| `POST` | `/api/Auth/forgot-password` | Request OTP for password reset | No |
+| `POST` | `/api/Auth/verify-otp` | Verify OTP code | No |
+| `POST` | `/api/Auth/reset-password` | Reset password with OTP | No |
 
 ### 👤 Profile — `/api/Profile`
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| `POST` | `/api/Profile/setup` | Create user health profile | ✅ |
-| `PUT` | `/api/Profile/update` | Update user health profile | ✅ |
+| `POST` | `/api/Profile/setup` | Create user health profile | Yes 🔒 |
+| `PUT` | `/api/Profile/update` | Update user health profile | Yes 🔒 |
 
 ### 🤖 Food Recognition — `/api/FoodRecognition`
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| `POST` | `/api/FoodRecognition/recognize` | Upload image for AI food recognition | ✅ |
-| `GET` | `/api/FoodRecognition/recent` | Get recent recognition results | ✅ |
+| `POST` | `/api/FoodRecognition/recognize` | Upload image for AI food recognition | Yes 🔒 |
+| `GET` | `/api/FoodRecognition/recent` | Get recent recognition results | Yes 🔒 |
 
 ### 🍽️ Meals — `/api/Meal`
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| `GET` | `/api/Meal/foods` | Get all available foods | ✅ |
-| `POST` | `/api/Meal/log` | Log a new meal with food items | ✅ |
-| `PUT` | `/api/Meal/{mealId}/type` | Update meal type | ✅ |
-| `PUT` | `/api/Meal/{mealId}/items` | Update meal food items | ✅ |
-| `DELETE` | `/api/Meal/{mealId}` | Delete a meal | ✅ |
-| `GET` | `/api/Meal/today` | Get today's meals | ✅ |
-| `GET` | `/api/Meal/daily-summary` | Get daily nutritional summary | ✅ |
-| `GET` | `/api/Meal/history?date=YYYY-MM-DD` | Get meal history for a specific date | ✅ |
+| `GET` | `/api/Meal/foods` | Get all available foods | Yes 🔒 |
+| `POST` | `/api/Meal/log` | Log a new meal with food items | Yes 🔒 |
+| `PUT` | `/api/Meal/{mealId}/type` | Update meal type | Yes 🔒 |
+| `PUT` | `/api/Meal/{mealId}/items` | Update meal food items | Yes 🔒 |
+| `DELETE` | `/api/Meal/{mealId}` | Delete a meal | Yes 🔒 |
+| `GET` | `/api/Meal/today` | Get today's meals | Yes 🔒 |
+| `GET` | `/api/Meal/daily-summary` | Get daily nutritional summary | Yes 🔒 |
+| `GET` | `/api/Meal/history?date=YYYY-MM-DD` | Get meal history for a specific date | Yes 🔒 |
 
 ---
 
@@ -333,7 +333,11 @@ erDiagram
    dotnet user-secrets set "JwtOptions:SecurityKey" "your-super-secret-key-here"
    dotnet user-secrets set "JwtOptions:Issuer" "FoodRecognitionApp"
    dotnet user-secrets set "JwtOptions:Audience" "FoodRecognitionAppUsers"
-   dotnet user-secrets set "EmailSettings:ApiKey" "your-sendgrid-api-key"
+   dotnet user-secrets set "EmailSettings:Host" "smtp.gmail.com"
+   dotnet user-secrets set "EmailSettings:Port" "587"
+   dotnet user-secrets set "EmailSettings:Email" "your-email@gmail.com"
+   dotnet user-secrets set "EmailSettings:Password" "your-app-password"
+   dotnet user-secrets set "EmailSettings:DisplayName" "FoodRecognitionApp"
    ```
 
 4. **Run the application**
@@ -359,7 +363,11 @@ erDiagram
 | `JwtOptions:Audience` | JWT token audience | User Secrets |
 | `AiModel:BaseUrl` | AI classification model API URL | `appsettings.json` |
 | `AiModel:TimeoutSeconds` | AI model request timeout | `appsettings.json` |
-| `EmailSettings:ApiKey` | SendGrid API key for emails | User Secrets |
+| `EmailSettings:Host` | SMTP server host (e.g. `smtp.gmail.com`) | User Secrets |
+| `EmailSettings:Port` | SMTP server port (e.g. `587`) | User Secrets |
+| `EmailSettings:Email` | Sender email address | User Secrets |
+| `EmailSettings:Password` | Email app password | User Secrets |
+| `EmailSettings:DisplayName` | Sender display name | User Secrets |
 
 ---
 
