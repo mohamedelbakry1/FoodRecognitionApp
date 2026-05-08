@@ -8,6 +8,6 @@ namespace FoodRecognitionApp.Services.Abstraction.AIModel
 {
     public interface IAIModelService
     {
-        Task<AIModelResponse?> ClassifyFoodAsync(IFormFile image);
+        Task<IEnumerable<AIModelResponse>?> ClassifyFoodAsync(IFormFile image);
     }
 }

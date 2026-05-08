@@ -53,7 +53,7 @@ namespace FoodRecognitionApp.Services.FoodRecognition
             return result;
         }
 
-        public async Task<FoodRecognitionResponse?> RecognizeFoodAsync(int userId, FoodRecognitionRequest request)
+        public async Task<IEnumerable<FoodRecognitionResponse>?> RecognizeFoodAsync(int userId, FoodRecognitionRequest request)
         {
             if (request.Image is null || request.Image.Length == 0) throw new UploadImageBadRequestException();
 
@@ -70,38 +70,50 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 
             await _unitOfWork.GetRepository<int, Image>().AddAsync(image);
 
-            var aiResponse = await _aiModelService.ClassifyFoodAsync(request.Image);
+            var AiItems = await _aiModelService.ClassifyFoodAsync(request.Image);
 
-            var foodSpec = new FoodByNameSpecification(aiResponse!.FoodName);
-            var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodSpec);
+            if(AiItems is null || !AiItems.Any()) throw new FoodRecognitionBadRequestException();
 
-            if (food is null) throw new FoodNotFoundException(aiResponse.FoodName);
+            var recognitionresult = new List<RecognitionResult>();
+            var foodResponses = new List<FoodRecognitionResponse>();
 
-            var recognitionResult = new RecognitionResult()
+            foreach (var AiItem in AiItems)
             {
-                ImageId = image.Id,
-                FoodId = food.Id,
-                Confidence_Score = aiResponse.Confidence_Score,
-                Estimated_Quantity = 1.0m
-            };
+                var foodSpec = new FoodByNameSpecification(AiItem!.FoodName);
+                var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodSpec);
+                if (food is null) continue;
 
-            image.RecognitionResults = new List<RecognitionResult> { recognitionResult };
+                recognitionresult.Add(new RecognitionResult
+                {
+                    ImageId = image.Id,
+                    FoodId = food.Id,
+                    Confidence_Score = AiItem.Confidence_Score,
+                    Estimated_Quantity = AiItem.EstimatedWeightGrams
+                });
+
+                foodResponses.Add(new FoodRecognitionResponse
+                {
+                    FoodId = food.Id,
+                    FoodName = food.Name,
+                    Calories = (food.Calories / 100m) * AiItem.EstimatedWeightGrams,
+                    Carbs = (food.Carbs / 100m) * AiItem.EstimatedWeightGrams,
+                    Protein = (food.Protein / 100m) * AiItem.EstimatedWeightGrams,
+                    Fats = (food.Fats / 100m) * AiItem.EstimatedWeightGrams,
+                    CategoryName = food.CategoryFood.CategoryName,
+                    Confidence_Score = AiItem.Confidence_Score,
+                    EstimatedWeightGrams = AiItem.EstimatedWeightGrams
+                });
+            }
+
+            if (!recognitionresult.Any()) throw new FoodRecognitionBadRequestException();
+
+            image.RecognitionResults = recognitionresult;
 
             var IsCreated = await _unitOfWork.SaveChangesAsync() > 0;
 
             if (!IsCreated) _attachmentService.Delete(ImageFolderName, imageUrl);
-
-            return new FoodRecognitionResponse
-            {
-                FoodId = food.Id,
-                FoodName = food.Name,
-                Calories = food.Calories,
-                Carbs = food.Carbs,
-                Protien = food.Protein,
-                Fats = food.Fats,
-                CategoryName = food.CategoryFood.CategoryName,
-                Confidence_Score = aiResponse.Confidence_Score,
-            };
+            
+            return foodResponses;
         }
 
         //private AIModelResponse GetAiResponse()

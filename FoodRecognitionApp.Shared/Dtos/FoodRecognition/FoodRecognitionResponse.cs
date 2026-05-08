@@ -11,8 +11,9 @@ namespace FoodRecognitionApp.Shared.Dtos.FoodRecognition
         public decimal Calories { get; set; }
         public decimal Carbs { get; set; }
         public decimal Fats { get; set; }
-        public decimal Protien { get; set; }
+        public decimal Protein { get; set; }
         public string CategoryName { get; set; } = null!;
         public double Confidence_Score { get; set; }
+        public decimal EstimatedWeightGrams { get; set; }
     }
 }

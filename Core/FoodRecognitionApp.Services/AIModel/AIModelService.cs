@@ -12,7 +12,7 @@ namespace FoodRecognitionApp.Services.AIModel
 {
     public class AIModelService(HttpClient _httpClient) : IAIModelService
     {
-        public async Task<AIModelResponse?> ClassifyFoodAsync(IFormFile image)
+        public async Task<IEnumerable<AIModelResponse>?> ClassifyFoodAsync(IFormFile image)
         {
             using var content = new MultipartFormDataContent();
             using var stream = image.OpenReadStream();
@@ -22,19 +22,26 @@ namespace FoodRecognitionApp.Services.AIModel
 
             content.Add(straemContent, "file", image.FileName);
 
-            var response = await _httpClient.PostAsync("/predict", content);
+            var response = await _httpClient.PostAsync("/analyze_meal", content);
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
 
-            var AiResponse = JsonSerializer.Deserialize<AIModelRequest>(json);
-
-            if (AiResponse is null) return null;
-            return new AIModelResponse
+            var options = new JsonSerializerOptions
             {
-                FoodName = AiResponse.ClassName,
-                Confidence_Score = AiResponse.Confidence
+                PropertyNameCaseInsensitive = true
             };
+
+            var AiResponse = JsonSerializer.Deserialize<AIModelApiResponse>(json, options);
+
+            if (AiResponse is null || AiResponse.MealDetails is null || !AiResponse.MealDetails.Any())
+                return null;
+            return AiResponse.MealDetails.Select(item => new AIModelResponse
+            {
+                FoodName = item.FoodName,
+                Confidence_Score = item.Confidence,
+                EstimatedWeightGrams = item.EstimatedWeightGrams
+            }).ToList();
         }
     }
 }

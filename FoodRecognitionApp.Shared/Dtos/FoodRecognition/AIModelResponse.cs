@@ -8,5 +8,6 @@ namespace FoodRecognitionApp.Shared.Dtos.FoodRecognition
     {
         public string FoodName { get; set; } = null!;
         public double Confidence_Score { get; set; }
+        public decimal EstimatedWeightGrams { get; set; }
     }
 }
