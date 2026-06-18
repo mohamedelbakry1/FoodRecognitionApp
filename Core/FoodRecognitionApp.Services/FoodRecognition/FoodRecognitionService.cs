@@ -1,4 +1,4 @@
-﻿using FoodRecognitionApp.Domain.Contracts;
+using FoodRecognitionApp.Domain.Contracts;
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Domain.Exceptions.BadRequest;
 using FoodRecognitionApp.Domain.Exceptions.NotFound;
@@ -34,17 +34,20 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 
             foreach(var image in images)
             {
-                var recognition = image.RecognitionResults.FirstOrDefault();
-                if (recognition is null) throw new RecognitionResultNotFoundException();
+                var foodNames = new List<string>();
 
-                var foodspec = new FoodByIdSpecification(recognition.FoodId);
-                var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodspec);
+                foreach (var recognition in image.RecognitionResults)
+                {
+                    var foodSpec = new FoodByIdSpecification(recognition.FoodId);
+                    var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodSpec);
+                    if (food is not null) foodNames.Add(food.Name);
+                }
 
-                if (food is null) throw new FoodNotFoundException(food!.Name);
+                if (!foodNames.Any()) continue;
 
                 result.Add(new RecentRecognitionResponse
                 {
-                    FoodName = food.Name,
+                    FoodName = string.Join(", ", foodNames),
                     ImageUrl = $"{baseUrl}/images/{image.ImageUrl}",
                     UploadTime = image.UploadTime
                 });
@@ -53,12 +56,12 @@ namespace FoodRecognitionApp.Services.FoodRecognition
             return result;
         }
 
-        public async Task<IEnumerable<FoodRecognitionResponse>?> RecognizeFoodAsync(int userId, FoodRecognitionRequest request)
+        public async Task<FoodRecognitionResponse?> RecognizeFoodAsync(int userId, FoodRecognitionRequest request)
         {
-            if (request.Image is null || request.Image.Length == 0) throw new UploadImageBadRequestException();
+            if (request.Image is null || request.Image.Length == 0)
+                throw new UploadImageBadRequestException();
 
             var imageUrl = await _attachmentService.Upload(ImageFolderName, request.Image);
-
             if (imageUrl is null) throw new UploadImageBadRequestException();
 
             var image = new Image()
@@ -70,50 +73,54 @@ namespace FoodRecognitionApp.Services.FoodRecognition
 
             await _unitOfWork.GetRepository<int, Image>().AddAsync(image);
 
-            var AiItems = await _aiModelService.ClassifyFoodAsync(request.Image);
+            var aiItems = await _aiModelService.ClassifyFoodAsync(request.Image);
+            if (aiItems is null || !aiItems.Any()) throw new FoodRecognitionBadRequestException();
 
-            if(AiItems is null || !AiItems.Any()) throw new FoodRecognitionBadRequestException();
+            var recognitionResults = new List<RecognitionResult>();
+            decimal totalCalories = 0, totalCarbs = 0, totalProtein = 0, totalFats = 0;
+            var foodNames = new List<string>();
 
-            var recognitionresult = new List<RecognitionResult>();
-            var foodResponses = new List<FoodRecognitionResponse>();
-
-            foreach (var AiItem in AiItems)
+            foreach (var aiItem in aiItems)
             {
-                var foodSpec = new FoodByNameSpecification(AiItem!.FoodName);
+                var foodSpec = new FoodByNameSpecification(aiItem.FoodName);
                 var food = await _unitOfWork.GetRepository<int, Food>().GetById(foodSpec);
-                if (food is null) continue;
 
-                recognitionresult.Add(new RecognitionResult
+                if (food is null) continue;
+                if (recognitionResults.Any(r => r.FoodId == food.Id)) continue;
+
+                var calories = (food.Calories / 100m) * aiItem.EstimatedWeightGrams;
+                var carbs = (food.Carbs / 100m) * aiItem.EstimatedWeightGrams;
+                var protein = (food.Protein / 100m) * aiItem.EstimatedWeightGrams;
+                var fats = (food.Fats / 100m) * aiItem.EstimatedWeightGrams;
+
+                totalCalories += calories;
+                totalCarbs += carbs;
+                totalProtein += protein;
+                totalFats += fats;
+                foodNames.Add(food.Name);
+
+                recognitionResults.Add(new RecognitionResult
                 {
                     ImageId = image.Id,
                     FoodId = food.Id,
-                    Confidence_Score = AiItem.Confidence_Score,
-                    Estimated_Quantity = AiItem.EstimatedWeightGrams
-                });
-
-                foodResponses.Add(new FoodRecognitionResponse
-                {
-                    FoodId = food.Id,
-                    FoodName = food.Name,
-                    Calories = (food.Calories / 100m) * AiItem.EstimatedWeightGrams,
-                    Carbs = (food.Carbs / 100m) * AiItem.EstimatedWeightGrams,
-                    Protein = (food.Protein / 100m) * AiItem.EstimatedWeightGrams,
-                    Fats = (food.Fats / 100m) * AiItem.EstimatedWeightGrams,
-                    CategoryName = food.CategoryFood.CategoryName,
-                    Confidence_Score = AiItem.Confidence_Score,
-                    EstimatedWeightGrams = AiItem.EstimatedWeightGrams
+                    Confidence_Score = aiItem.Confidence_Score,
+                    Estimated_Quantity = aiItem.EstimatedWeightGrams
                 });
             }
+            if (!recognitionResults.Any())
+                throw new FoodRecognitionBadRequestException();
 
-            if (!recognitionresult.Any()) throw new FoodRecognitionBadRequestException();
+            image.RecognitionResults = recognitionResults;
+            await _unitOfWork.SaveChangesAsync();
 
-            image.RecognitionResults = recognitionresult;
-
-            var IsCreated = await _unitOfWork.SaveChangesAsync() > 0;
-
-            if (!IsCreated) _attachmentService.Delete(ImageFolderName, imageUrl);
-            
-            return foodResponses;
+            return new FoodRecognitionResponse
+            {
+                FoodName = string.Join(", ", foodNames),
+                TotalCalories = totalCalories,
+                TotalCarbs = totalCarbs,
+                TotalProtein = totalProtein,
+                TotalFats = totalFats
+            };
         }
 
         //private AIModelResponse GetAiResponse()

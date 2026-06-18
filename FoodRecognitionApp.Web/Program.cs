@@ -124,7 +124,7 @@ namespace FoodRecognitionApp.Web
 
             var app = builder.Build();
 
-            var scope = app.Services.CreateScope();
+            using var scope = app.Services.CreateScope();
             var dbIntializer = scope.ServiceProvider.GetRequiredService<IDbIntializer>(); // Ask CLR to Create Object From IDbInitializer
             await dbIntializer.IntializeAsync();
 
@@ -132,9 +132,10 @@ namespace FoodRecognitionApp.Web
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-                app.UseSwagger();
-                app.UseSwaggerUI();
             }
+
+            app.UseSwagger(); 
+            app.UseSwaggerUI();
 
             app.UseCors("AllowAll");
 

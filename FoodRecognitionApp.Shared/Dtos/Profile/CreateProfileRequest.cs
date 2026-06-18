@@ -10,7 +10,7 @@ namespace FoodRecognitionApp.Shared.Dtos.Profile
     public class CreateProfileRequest
     {
         [Required(ErrorMessage ="Age is Required")]
-        [Range(3,100,ErrorMessage = "Age must be between 16 and 100 years")]
+        [Range(3,100,ErrorMessage = "Age must be between 3 and 100 years")]
         public int Age { get; set; }
         [Required(ErrorMessage ="Height is Required")]
         [Range(100, 250, ErrorMessage = "Height must be between 100 and 250 cm")]

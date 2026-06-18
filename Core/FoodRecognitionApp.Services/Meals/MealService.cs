@@ -38,7 +38,7 @@ namespace FoodRecognitionApp.Services.Meals
         public async Task UpdateMealTypeAsync(int userId, int mealId, UpdateMealTypeRequest request)
         {
             var spec = new MealByIdAndUserSpecification(userId, mealId);
-            var meal = await _unitOfWork.GetRepository<int, Meal>().GetById(spec);
+            var meal = await _unitOfWork.GetRepository<int, Meal>().GetById(spec, true);
             if (meal is null) throw new MealNotFoundException(mealId);
 
             meal.MealType = request.MealType;
@@ -51,7 +51,7 @@ namespace FoodRecognitionApp.Services.Meals
         public async Task<MealResponse> UpdateMealItemsAsync(int userId, int mealId, UpdateMealItemsRequest request)
         {
             var spec = new MealWithItemsByIdAndUserSpecification(userId, mealId);
-            var meal = await _unitOfWork.GetRepository<int, Meal>().GetById(spec);
+            var meal = await _unitOfWork.GetRepository<int, Meal>().GetById(spec, true);
             if (meal is null) throw new MealNotFoundException(mealId);
 
             var foods = await ValidateAndGetFoodsAsync(request.Items);
@@ -75,7 +75,7 @@ namespace FoodRecognitionApp.Services.Meals
         public async Task DeleteMealAsync(int userId, int mealId)
         {
             var spec = new MealByIdAndUserSpecification(userId, mealId);
-            var meal = await _unitOfWork.GetRepository<int, Meal>().GetById(spec);
+            var meal = await _unitOfWork.GetRepository<int, Meal>().GetById(spec, true);
 
             if(meal is null) throw new MealNotFoundException(mealId);
             
@@ -155,7 +155,7 @@ namespace FoodRecognitionApp.Services.Meals
             foreach (var item in items)
             {
                 if (!foods.Any(f => f.Id == item.FoodId))
-                    throw new FoodNotFoundException(item.FoodId.ToString());
+                    throw new FoodNotFoundException();
             }
 
             return foods;
