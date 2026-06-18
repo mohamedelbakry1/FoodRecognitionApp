@@ -49,9 +49,9 @@ namespace FoodRecognitionApp.Services.Profile
         {
             var spec = new ProfileByUserIdSpecification(userId);
 
-            var profile = await _unitOfWork.GetRepository<int, UserProfile>().GetById(spec);
+            var profile = await _unitOfWork.GetRepository<int, UserProfile>().GetById(spec, true);
 
-            if (profile == null) throw new ProfileNotFoundException(profile!.UserAccount.Email!);
+            if (profile == null) throw new ProfileNotFoundException(userId);
 
             profile.Age = request.Age;
             profile.Weight = request.Weight;

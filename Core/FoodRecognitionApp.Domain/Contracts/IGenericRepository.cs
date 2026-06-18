@@ -9,7 +9,7 @@ namespace FoodRecognitionApp.Domain.Contracts
     public interface IGenericRepository<TKey,TEntity> where TEntity : BaseEntity<TKey>
     {
         Task<IEnumerable<TEntity>> GetAllAsync(ISpecification<TKey, TEntity> spec, bool changeTracker = false);
-        Task<TEntity?> GetById(ISpecification<TKey, TEntity> spec);
+        Task<TEntity?> GetById(ISpecification<TKey, TEntity> spec, bool changeTracker = false);
         Task<int> CountAsync(ISpecification<TKey, TEntity> spec);
         Task AddAsync(TEntity entity);
         void Update(TEntity entity);

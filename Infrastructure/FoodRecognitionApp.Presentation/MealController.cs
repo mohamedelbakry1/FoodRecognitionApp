@@ -1,6 +1,7 @@
 ﻿using FoodRecognitionApp.Domain.Exceptions.UnAuthorized;
 using FoodRecognitionApp.Services.Abstraction;
 using FoodRecognitionApp.Shared.Dtos.Meal;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace FoodRecognitionApp.Presentation
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class MealController(IServiceManager _serviceManager) : ControllerBase
     {
         [HttpGet("foods")]

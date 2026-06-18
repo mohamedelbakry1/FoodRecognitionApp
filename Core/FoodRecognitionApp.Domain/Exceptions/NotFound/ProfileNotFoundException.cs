@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FoodRecognitionApp.Domain.Exceptions.NotFound
 {
-    public class ProfileNotFoundException(string email) : NotFoundException($"Profile for User with Email {email} was Not Found!!") 
+    public class ProfileNotFoundException(int userId) : NotFoundException($"Profile for User with UserId {userId} was Not Found!!") 
     {
     }
 }

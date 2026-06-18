@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FoodRecognitionApp.Domain.Exceptions.NotFound
 {
-    public class FoodNotFoundException(string foodName) : NotFoundException($"Food {foodName} Not Found in Database")
+    public class FoodNotFoundException() : NotFoundException($"Food Not Found in Database")
     {
 
     }

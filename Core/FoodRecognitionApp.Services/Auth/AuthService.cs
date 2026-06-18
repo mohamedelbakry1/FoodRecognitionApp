@@ -74,7 +74,7 @@ namespace FoodRecognitionApp.Services.Auth
             {
                 UserName = user.UserName ?? "",
                 Email = user.Email ?? "",
-                Token = await GenerateTokenAsync(user),
+                Token = await GenerateTokenAsync(user)
             };
         }
 
