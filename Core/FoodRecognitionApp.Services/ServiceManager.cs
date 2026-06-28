@@ -1,4 +1,4 @@
-﻿using FoodRecognitionApp.Domain.Contracts;
+using FoodRecognitionApp.Domain.Contracts;
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Services.Abstraction;
 using FoodRecognitionApp.Services.Abstraction.AIModel;
@@ -8,10 +8,12 @@ using FoodRecognitionApp.Services.Abstraction.Email;
 using FoodRecognitionApp.Services.Abstraction.FoodRecognition;
 using FoodRecognitionApp.Services.Abstraction.Meals;
 using FoodRecognitionApp.Services.Abstraction.Profile;
+using FoodRecognitionApp.Services.Abstraction.Reports;
 using FoodRecognitionApp.Services.Auth;
 using FoodRecognitionApp.Services.FoodRecognition;
 using FoodRecognitionApp.Services.Meals;
 using FoodRecognitionApp.Services.Profile;
+using FoodRecognitionApp.Services.Reports;
 using FoodRecognitionApp.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -43,5 +45,8 @@ namespace FoodRecognitionApp.Services
         public IFoodRecognitionService FoodRecognitionService { get; } = new FoodRecognitionService(_unitOfWork, _attachmentService,_aIModelService,_httpContextAccessor);
 
         public IMealService MealService { get; } = new MealService(_unitOfWork);
+
+        public IReportService ReportService { get; } = new ReportService(_unitOfWork, _userManager);
     }
 }
+

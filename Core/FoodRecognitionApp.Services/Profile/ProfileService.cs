@@ -69,14 +69,12 @@ namespace FoodRecognitionApp.Services.Profile
 
         private (decimal dailyCalories,decimal amr,decimal bmr) CalculateDailyCalories(CreateProfileRequest request)
         {
-            // 1. Calculate BMR
             decimal bmr = 0;
             if (request.Gender == Gender.Male)
                 bmr = (10 * request.Weight) + (6.25m * request.Height) - (5 * request.Age) + 5;
             else
                 bmr = (10 * request.Weight) + (6.25m * request.Height) - (5 * request.Age) - 161;
 
-            // 2. Calculate AMR
             decimal activityMultiplier = request.ActivityLevel switch
             {
                 ActivityLevel.Sedentary => 1.2m,
@@ -88,12 +86,11 @@ namespace FoodRecognitionApp.Services.Profile
 
             decimal amr = bmr * activityMultiplier;
 
-            // 3. Calculate Daily Target based on Goal
             decimal dailyCalories = request.GoalType switch
             {
                 GoalType.LoseWeight => amr - 500,
                 GoalType.GainWeight => amr + 500,
-                _ => amr // Maintain
+                _ => amr
             };
             return (dailyCalories,amr,bmr);
         }

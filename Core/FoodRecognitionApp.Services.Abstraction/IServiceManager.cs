@@ -1,7 +1,8 @@
-﻿using FoodRecognitionApp.Services.Abstraction.Auth;
+using FoodRecognitionApp.Services.Abstraction.Auth;
 using FoodRecognitionApp.Services.Abstraction.FoodRecognition;
 using FoodRecognitionApp.Services.Abstraction.Meals;
 using FoodRecognitionApp.Services.Abstraction.Profile;
+using FoodRecognitionApp.Services.Abstraction.Reports;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,5 +15,6 @@ namespace FoodRecognitionApp.Services.Abstraction
         IProfileService ProfileService { get; }
         IFoodRecognitionService FoodRecognitionService { get; }
         IMealService MealService { get; }
+        IReportService ReportService { get; }
     }
 }
