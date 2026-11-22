@@ -1,6 +1,7 @@
 ﻿using FoodRecognitionApp.Domain.Contracts;
 using FoodRecognitionApp.Domain.Entities;
 using FoodRecognitionApp.Persistence.Data.Contexts;
+using FoodRecognitionApp.Persistence.Sepecifications;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,27 +9,27 @@ using System.Text;
 
 namespace FoodRecognitionApp.Persistence.Repositories
 {
-    public class GenericRepository<TKey, TEntity>(AppDbContext _context) : IGenericRepository<TKey, TEntity> where TEntity : BaseEntity<TKey>
+    internal class GenericRepository<TKey, TEntity>(AppDbContext _context) : IGenericRepository<TKey, TEntity> where TEntity : BaseEntity<TKey>
     {
-        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecification<TKey, TEntity> spec, bool changeTracker = false)
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecification<TKey, TEntity> spec, bool changeTracker = false, CancellationToken ct = default)
         {
-            return changeTracker ? await ApplySpecifications(spec).ToListAsync() : 
-                                   await ApplySpecifications(spec).AsNoTracking().ToListAsync();
+            return changeTracker ? await ApplySpecifications(spec).ToListAsync(ct) : 
+                                   await ApplySpecifications(spec).AsNoTracking().ToListAsync(ct);
         }
 
-        public async Task<TEntity?> GetById(ISpecification<TKey, TEntity> spec, bool changeTracker = false)
+        public async Task<TEntity?> GetById(ISpecification<TKey, TEntity> spec, bool changeTracker = false, CancellationToken ct = default)
         {
-            return changeTracker ? await ApplySpecifications(spec).FirstOrDefaultAsync() : 
-                                   await ApplySpecifications(spec).AsNoTracking().FirstOrDefaultAsync();
+            return changeTracker ? await ApplySpecifications(spec).FirstOrDefaultAsync(ct) : 
+                                   await ApplySpecifications(spec).AsNoTracking().FirstOrDefaultAsync(ct);
         }
-        public async Task<int> CountAsync(ISpecification<TKey, TEntity> spec)
+        public async Task<int> CountAsync(ISpecification<TKey, TEntity> spec, CancellationToken ct = default)
         {
-            return await ApplySpecifications(spec).CountAsync();
+            return await ApplySpecifications(spec).CountAsync(ct);
         }
 
-        public async Task AddAsync(TEntity entity)
+        public void Add(TEntity entity)
         {
-            await _context.Set<TEntity>().AddAsync(entity);
+            _context.Set<TEntity>().Add(entity);
         }
         public void Update(TEntity entity)
         {

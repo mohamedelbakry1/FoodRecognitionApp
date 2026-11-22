@@ -5,12 +5,12 @@ using System.Text;
 
 namespace FoodRecognitionApp.Services.Specifications
 {
-    public class TodayMealsSpecification : BaseSpecification<int, Meal>
+    internal class TodayMealsSpecification : BaseSpecification<int, Meal>
     {
-        public TodayMealsSpecification(int userId) : base(M => M.UserId == userId && M.MealTime.Date == DateTime.Today)
+        public TodayMealsSpecification(Guid userId) : base(M => M.UserId == userId && M.MealTime.Date == DateTime.UtcNow.Date)
         {
             Includes.Add(M => M.MealItems);
-            AddOrderBy(M => M.MealItems);
+            AddOrderBy(M => M.MealTime);
         }
     }
 }

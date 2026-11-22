@@ -14,8 +14,7 @@ namespace FoodRecognitionApp.Domain.Entities
         #endregion
 
         #region Meal - UserAccount
-        public int UserId { get; set; }
-        public UserAccount UserAccount { get; set; } = null!;
+        public Guid UserId { get; set; }
         #endregion
 
         #region Meal - MealItem

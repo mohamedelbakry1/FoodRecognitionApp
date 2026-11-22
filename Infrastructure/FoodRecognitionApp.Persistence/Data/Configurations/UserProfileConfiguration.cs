@@ -1,4 +1,5 @@
 ﻿using FoodRecognitionApp.Domain.Entities;
+using FoodRecognitionApp.Persistence.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -16,9 +17,14 @@ namespace FoodRecognitionApp.Persistence.Data.Configurations
 
             builder.Property(U => U.Daily_Calories).HasPrecision(6, 2);
 
-            builder.HasOne(P => P.UserAccount)
+            builder.Property(o => o.Gender).HasConversion<string>().HasMaxLength(6);
+            builder.Property(o => o.ActivityLevel).HasConversion<string>().HasMaxLength(20);
+            builder.Property(o => o.GoalType).HasConversion<string>().HasMaxLength(15);
+
+            builder.HasOne<UserAccount>()
                    .WithOne()
-                   .HasForeignKey<UserProfile>(P => P.AccountId);
+                   .HasForeignKey<UserProfile>(P => P.AccountId)
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.ToTable(Tb =>
             {

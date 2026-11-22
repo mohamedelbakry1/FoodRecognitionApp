@@ -1,6 +1,8 @@
 ﻿using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Services.Abstraction.Auth;
 using FoodRecognitionApp.Shared.Dtos.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,52 +12,67 @@ using System.Text;
 
 namespace FoodRecognitionApp.Presentation
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController(IServiceManager _serviceManager) : ControllerBase
+    public class AuthController(IAuthService _authService) : ApiBaseController
     {
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest request)
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<UserResponse>> Login(LoginRequest request, CancellationToken ct = default)
         {
-            var result = await _serviceManager.AuthService.LoginAsync(request);
-            return Ok(result);
+            var result = await _authService.LoginAsync(request, ct);
+            return ToActionResult(result);
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest request)
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<UserResponse>> Register(RegisterRequest request, CancellationToken ct = default)
         {
-            var result = await _serviceManager.AuthService.RegisterAsync(request);
-            return Ok(result);
+            var result = await _authService.RegisterAsync(request, ct);
+            return ToActionResult(result);
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> ForgotPassword(ForgotPasswordRequest request, CancellationToken ct = default)
         {
-            await _serviceManager.AuthService.ForgotPasswordAsync(request);
-            return Ok();
+            var result = await _authService.ForgotPasswordAsync(request, ct);
+            return ToActionResult(result);
         }
 
         [HttpPost("verify-otp")]
-        public async Task<IActionResult> VerifyOtp(VerifyOtpRequest request)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public ActionResult VerifyOtp(VerifyOtpRequest request)
         {
-            var result = _serviceManager.AuthService.VerifyOtp(request);
-            return Ok(result);
+            var result = _authService.VerifyOtp(request);
+            return ToActionResult(result);
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken ct = default)
         {
-            await _serviceManager.AuthService.ResetPasswordAsync(request);
-            return Ok();
+            var result = await _authService.ResetPasswordAsync(request, ct);
+            return ToActionResult(result);
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetCurrentUser()
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<UserResponse>> GetCurrentUser(CancellationToken ct = default)
         {
-            var email = User.FindFirst(ClaimTypes.Email);
-            var result = await _serviceManager.AuthService.GetCurrentUserAsync(email!.Value);
-            return Ok(result);
+            var userId = GetUserIdFromToken();
+            var result = await _authService.GetCurrentUserAsync(userId, ct);
+            return ToActionResult(result);
         }
     }
 }

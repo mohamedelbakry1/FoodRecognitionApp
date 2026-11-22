@@ -1,4 +1,5 @@
 ﻿using FoodRecognitionApp.Domain.Entities;
+using FoodRecognitionApp.Persistence.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using System.Text;
 
 namespace FoodRecognitionApp.Persistence.Data.Contexts
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<UserAccount,Role,int>(options)
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<UserAccount,Role,Guid>(options)
     {
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -18,11 +19,11 @@ namespace FoodRecognitionApp.Persistence.Data.Contexts
 
             builder.Entity<UserAccount>().ToTable("UserAccounts");
             builder.Entity<Role>().ToTable("Roles");
-            builder.Entity<IdentityUserRole<int>>().ToTable("UserRoles");
-            builder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
-            builder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
-            builder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
-            builder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
+            builder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
+            builder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
+            builder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
+            builder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
+            builder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         }
 
         #region DbSets

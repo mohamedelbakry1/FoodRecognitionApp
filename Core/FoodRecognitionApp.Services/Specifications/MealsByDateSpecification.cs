@@ -5,9 +5,9 @@ using System.Text;
 
 namespace FoodRecognitionApp.Services.Specifications
 {
-    public class MealsByDateSpecification : BaseSpecification<int , Meal>
+    internal class MealsByDateSpecification : BaseSpecification<int , Meal>
     {
-        public MealsByDateSpecification(int userId, DateTime date) : base(M => M.UserId == userId && M.MealTime.Date == date)
+        public MealsByDateSpecification(Guid userId, DateTime date) : base(M => M.UserId == userId && M.MealTime.Date == date)
         {
             Includes.Add(M => M.MealItems);
             AddOrderBy(M => M.MealTime);

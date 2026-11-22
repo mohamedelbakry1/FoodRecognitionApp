@@ -1,7 +1,9 @@
 ﻿using FoodRecognitionApp.Domain.Exceptions.UnAuthorized;
 using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Services.Abstraction.Meals;
 using FoodRecognitionApp.Shared.Dtos.Meal;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,78 +12,80 @@ using System.Text;
 
 namespace FoodRecognitionApp.Presentation
 {
-    [ApiController]
-    [Route("api/[controller]")]
     [Authorize]
-    public class MealController(IServiceManager _serviceManager) : ControllerBase
+    public class MealController(IMealService _mealService) : ApiBaseController
     {
         [HttpGet("foods")]
-        public async Task<IActionResult> GetAllFoods()
+        [ProducesResponseType(typeof(IReadOnlyList<FoodItemResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IReadOnlyList<FoodItemResponse>>> GetAllFoods(CancellationToken ct)
         {
-            var result = await _serviceManager.MealService.GetAllFoodsAsync();
-            return Ok(result);
+            var result = await _mealService.GetAllFoodsAsync(ct);
+            return ToActionResult(result);
         }
-
         [HttpPost("log")]
-        public async Task<IActionResult> CreateMeal(CreateMealRequest request)
+        [ProducesResponseType(typeof(MealResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<MealResponse>> CreateMeal([FromBody] CreateMealRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            var result = await _serviceManager.MealService.AddMealAsync(userId, request);
-            return Ok(result);
+            var userId = GetUserIdFromToken();
+            var result = await _mealService.AddMealAsync(userId, request, ct);
+            return ToActionResult(result);
         }
-
-        [HttpPut("{mealId}/type")]
-        public async Task<IActionResult> UpdateMealType(int mealId, UpdateMealTypeRequest request)
+        [HttpPut("{mealId:int}/type")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> UpdateMealType(int mealId, [FromBody] UpdateMealTypeRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            await _serviceManager.MealService.UpdateMealTypeAsync(userId, mealId, request);
-            return Ok("Meal Type Updated Successfully");
+            var userId = GetUserIdFromToken();
+            var result = await _mealService.UpdateMealTypeAsync(userId, mealId, request, ct);
+            return ToActionResult(result);
         }
-        [HttpPut("{mealId}/items")]
-        public async Task<IActionResult> UpdateMealItems(int mealId, UpdateMealItemsRequest request)
+        [HttpPut("{mealId:int}/items")]
+        [ProducesResponseType(typeof(MealResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<MealResponse>> UpdateMealItems(int mealId, [FromBody] UpdateMealItemsRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            var result = await _serviceManager.MealService.UpdateMealItemsAsync(userId, mealId, request);
-            return Ok(result);
+            var userId = GetUserIdFromToken();
+            var result = await _mealService.UpdateMealItemsAsync(userId, mealId, request, ct);
+            return ToActionResult(result);
         }
-
-        [HttpDelete("{mealId}")]
-        public async Task<IActionResult> DeleteMeal(int mealId)
+        [HttpDelete("{mealId:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> DeleteMeal(int mealId, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            await _serviceManager.MealService.DeleteMealAsync(userId, mealId);
-            return Ok("Meal Deleted Successfully");
+            var userId = GetUserIdFromToken();
+            var result = await _mealService.DeleteMealAsync(userId, mealId, ct);
+            return ToActionResult(result);
         }
-
         [HttpGet("today")]
-        public async Task<IActionResult> GetTodayMeals()
+        [ProducesResponseType(typeof(TodayMealsResponse), StatusCodes.Status200OK)]
+        public async Task<ActionResult<TodayMealsResponse>> GetTodayMeals(CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            var result = await _serviceManager.MealService.GetTodayMealsAsync(userId);
-            return Ok(result);
+            var userId = GetUserIdFromToken();
+            var result = await _mealService.GetTodayMealsAsync(userId, ct);
+            return ToActionResult(result);
         }
-
         [HttpGet("daily-summary")]
-        public async Task<IActionResult> GetDailySummary()
+        [ProducesResponseType(typeof(DailySummaryResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<DailySummaryResponse>> GetDailySummary(CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            var result = await _serviceManager.MealService.GetDailySummaryAsync(userId);
-            return Ok(result);
+            var userId = GetUserIdFromToken();
+            var result = await _mealService.GetDailySummaryAsync(userId, ct);
+            return ToActionResult(result);
         }
-
         [HttpGet("history")]
-        public async Task<IActionResult> GetMealHistory([FromQuery] DateTime date)
+        [ProducesResponseType(typeof(TodayMealsResponse), StatusCodes.Status200OK)]
+        public async Task<ActionResult<TodayMealsResponse>> GetMealHistory([FromQuery] DateTime date, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            var result = await _serviceManager.MealService.GetMealHistoryAsync(userId, date);
-            return Ok(result);
-        }
-
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim is null) throw new UnAuthorizedException("You are not Authorized");
-            return int.Parse(userIdClaim.Value);
+            var userId = GetUserIdFromToken();
+            var result = await _mealService.GetMealHistoryAsync(userId, date, ct);
+            return ToActionResult(result);
         }
     }
 }

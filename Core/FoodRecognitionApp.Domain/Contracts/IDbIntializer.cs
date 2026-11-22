@@ -6,6 +6,6 @@ namespace FoodRecognitionApp.Domain.Contracts
 {
     public interface IDbIntializer
     {
-        Task IntializeAsync();
+        Task SeedDataAsync(CancellationToken ct = default);
     }
 }

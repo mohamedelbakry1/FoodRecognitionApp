@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FoodRecognitionApp.Services.Specifications
 {
-    public class FoodsByIdSpecification : BaseSpecification<int, Food>
+    internal class FoodsByIdSpecification : BaseSpecification<int, Food>
     {
         public FoodsByIdSpecification(List<int> foodsId) : base(F => foodsId.Contains(F.Id))
         {

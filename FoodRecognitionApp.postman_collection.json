@@ -1,279 +1,472 @@
 {
-	"info": {
-		"name": "FoodRecognitionApp API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"variable": [
-		{ "key": "baseUrl", "value": "http://foodrecognitionapp.runasp.net" },
-		{ "key": "token", "value": "" }
-	],
-	"item": [
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Register",
-					"request": {
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"userName\": \"TestUser\",\n  \"email\": \"testuser@gmail.com\",\n  \"password\": \"P@ssw0rd\",\n  \"confirmPassword\": \"P@ssw0rd\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Auth/register"
-					},
-					"event": [{
-						"listen": "test",
-						"script": {
-							"exec": [
-								"if (pm.response.code === 200) {",
-								"    var json = pm.response.json();",
-								"    if (json.token) pm.collectionVariables.set('token', json.token);",
-								"}"
-							]
-						}
-					}]
-				},
-				{
-					"name": "Login",
-					"request": {
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"testuser@gmail.com\",\n  \"password\": \"P@ssw0rd\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Auth/login"
-					},
-					"event": [{
-						"listen": "test",
-						"script": {
-							"exec": [
-								"if (pm.response.code === 200) {",
-								"    var json = pm.response.json();",
-								"    if (json.token) pm.collectionVariables.set('token', json.token);",
-								"}"
-							]
-						}
-					}]
-				},
-				{
-					"name": "Get Current User",
-					"request": {
-						"method": "GET",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"url": "{{baseUrl}}/api/Auth"
-					}
-				},
-				{
-					"name": "Forgot Password",
-					"request": {
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"testuser@gmail.com\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Auth/forgot-password"
-					}
-				},
-				{
-					"name": "Verify OTP",
-					"request": {
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"testuser@gmail.com\",\n  \"otp\": \"123456\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Auth/verify-otp"
-					}
-				},
-				{
-					"name": "Reset Password",
-					"request": {
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"testuser@gmail.com\",\n  \"otp\": \"123456\",\n  \"password\": \"NewP@ss1\",\n  \"confirmPassword\": \"NewP@ss1\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Auth/reset-password"
-					}
-				}
-			]
-		},
-		{
-			"name": "Profile",
-			"item": [
-				{
-					"name": "Setup Profile",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"age\": 25,\n  \"height\": 175,\n  \"weight\": 75,\n  \"gender\": \"Male\",\n  \"goalType\": \"LoseWeight\",\n  \"activityLevel\": \"ModeratelyActive\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Profile/setup"
-					}
-				},
-				{
-					"name": "Update Profile",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"age\": 26,\n  \"height\": 175,\n  \"weight\": 73,\n  \"gender\": \"Male\",\n  \"goalType\": \"MaintainWeight\",\n  \"activityLevel\": \"HighlyActive\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Profile/update"
-					}
-				}
-			]
-		},
-		{
-			"name": "Meal",
-			"item": [
-				{
-					"name": "Get All Foods",
-					"request": {
-						"method": "GET",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"url": "{{baseUrl}}/api/Meal/foods"
-					}
-				},
-				{
-					"name": "Log Meal",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"mealType\": \"Lunch\",\n  \"items\": [\n    { \"foodId\": 1, \"quantity\": 200 },\n    { \"foodId\": 2, \"quantity\": 150 }\n  ]\n}"
-						},
-						"url": "{{baseUrl}}/api/Meal/log"
-					},
-					"event": [{
-						"listen": "test",
-						"script": {
-							"exec": [
-								"if (pm.response.code === 200) {",
-								"    var json = pm.response.json();",
-								"    if (json.mealId) pm.collectionVariables.set('mealId', json.mealId);",
-								"}"
-							]
-						}
-					}]
-				},
-				{
-					"name": "Update Meal Type",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"mealType\": \"Dinner\"\n}"
-						},
-						"url": "{{baseUrl}}/api/Meal/{{mealId}}/type"
-					}
-				},
-				{
-					"name": "Update Meal Items",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"items\": [\n    { \"foodId\": 3, \"quantity\": 300 },\n    { \"foodId\": 4, \"quantity\": 100 }\n  ]\n}"
-						},
-						"url": "{{baseUrl}}/api/Meal/{{mealId}}/items"
-					}
-				},
-				{
-					"name": "Get Today Meals",
-					"request": {
-						"method": "GET",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"url": "{{baseUrl}}/api/Meal/today"
-					}
-				},
-				{
-					"name": "Get Daily Summary",
-					"request": {
-						"method": "GET",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"url": "{{baseUrl}}/api/Meal/daily-summary"
-					}
-				},
-				{
-					"name": "Get Meal History",
-					"request": {
-						"method": "GET",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"url": {
-							"raw": "{{baseUrl}}/api/Meal/history?date=2026-05-08",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "Meal", "history"],
-							"query": [{ "key": "date", "value": "2026-05-08" }]
-						}
-					}
-				},
-				{
-					"name": "Delete Meal",
-					"request": {
-						"method": "DELETE",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"url": "{{baseUrl}}/api/Meal/{{mealId}}"
-					}
-				}
-			]
-		},
-		{
-			"name": "Food Recognition",
-			"item": [
-				{
-					"name": "Recognize Food (Upload Image)",
-					"request": {
-						"method": "POST",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "Image",
-									"type": "file",
-									"src": ""
-								}
-							]
-						},
-						"url": "{{baseUrl}}/api/FoodRecognition/recognize"
-					}
-				},
-				{
-					"name": "Get Recent Recognitions",
-					"request": {
-						"method": "GET",
-						"header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-						"url": "{{baseUrl}}/api/FoodRecognition/recent"
-					}
-				}
-			]
-		}
-	]
+  "info": {
+    "name": "FoodRecognitionApp API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5240"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "value": "",
+      "key": "mealId"
+    },
+    {
+      "value": "2026-11-19",
+      "key": "historyDate"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"P@ssw0rd\",\n  \"confirmPassword\": \"P@ssw0rd\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Auth/register"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.token) pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"P@ssw0rd\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.token) pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/Auth"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@gmail.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Auth/forgot-password"
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@gmail.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Auth/verify-otp"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@gmail.com\",\n  \"otp\": \"123456\",\n  \"password\": \"NewP@ss1\",\n  \"confirmPassword\": \"NewP@ss1\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Auth/reset-password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Setup Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"age\": 25,\n  \"height\": 175,\n  \"weight\": 75,\n  \"gender\": \"Male\",\n  \"goalType\": \"LoseWeight\",\n  \"activityLevel\": \"ModeratelyActive\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Profile/setup"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"age\": 26,\n  \"height\": 175,\n  \"weight\": 73,\n  \"gender\": \"Male\",\n  \"goalType\": \"MaintainWeight\",\n  \"activityLevel\": \"HighlyActive\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Profile/update"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Meal",
+      "item": [
+        {
+          "name": "Get All Foods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/Meal/foods"
+          }
+        },
+        {
+          "name": "Log Meal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mealType\": \"Lunch\",\n  \"items\": [\n    { \"foodId\": 1, \"quantity\": 200 },\n    { \"foodId\": 2, \"quantity\": 150 }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/Meal/log"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.token) pm.collectionVariables.set(\"token\", json.token);",
+                  "    if (json.mealId) pm.collectionVariables.set(\"mealId\", json.mealId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Meal Type",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mealType\": \"Dinner\"\n}"
+            },
+            "url": "{{baseUrl}}/api/Meal/{{mealId}}/type"
+          }
+        },
+        {
+          "name": "Update Meal Items",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"foodId\": 3, \"quantity\": 300 },\n    { \"foodId\": 4, \"quantity\": 100 }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/Meal/{{mealId}}/items"
+          }
+        },
+        {
+          "name": "Get Today Meals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/Meal/today"
+          }
+        },
+        {
+          "name": "Get Daily Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/Meal/daily-summary"
+          }
+        },
+        {
+          "name": "Get Meal History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Meal/history?date={{historyDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "Meal",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{historyDate}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Meal",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/Meal/{{mealId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Food Recognition",
+      "item": [
+        {
+          "name": "Recognize Food (Upload Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "Image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/FoodRecognition/recognize"
+          }
+        },
+        {
+          "name": "Get Recent Recognitions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/FoodRecognition/recent"
+          }
+        }
+      ]
+    },
+    {
+      "item": [
+        {
+          "request": {
+            "url": "{{baseUrl}}/api/Report/system-overview",
+            "header": [],
+            "method": "GET"
+          },
+          "name": "System Overview"
+        },
+        {
+          "request": {
+            "url": "{{baseUrl}}/api/Report/food-recognition",
+            "header": [],
+            "method": "GET"
+          },
+          "name": "Food Recognition Report"
+        },
+        {
+          "request": {
+            "url": "{{baseUrl}}/api/Report/user-demographics",
+            "header": [],
+            "method": "GET"
+          },
+          "name": "User Demographics"
+        },
+        {
+          "request": {
+            "url": "{{baseUrl}}/api/Report/user-history",
+            "header": [
+              {
+                "value": "Bearer {{token}}",
+                "key": "Authorization"
+              }
+            ],
+            "method": "GET"
+          },
+          "name": "My Recognition History"
+        },
+        {
+          "request": {
+            "url": "{{baseUrl}}/api/Report/nutritional-insights",
+            "header": [],
+            "method": "GET"
+          },
+          "name": "Nutritional Insights"
+        },
+        {
+          "request": {
+            "url": "{{baseUrl}}/api/Report/ai-performance",
+            "header": [],
+            "method": "GET"
+          },
+          "name": "AI Performance"
+        },
+        {
+          "request": {
+            "url": "{{baseUrl}}/api/Report/usage-trends",
+            "header": [],
+            "method": "GET"
+          },
+          "name": "Usage Trends"
+        }
+      ],
+      "name": "Reports"
+    }
+  ]
 }

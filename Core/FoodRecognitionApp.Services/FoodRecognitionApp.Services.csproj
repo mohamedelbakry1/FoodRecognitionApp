@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.16.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
-    <PackageReference Include="QuestPDF" Version="2026.6.0" />
-    <PackageReference Include="ScottPlot" Version="5.1.58" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\FoodRecognitionApp.Domain\FoodRecognitionApp.Domain.csproj" />
     <ProjectReference Include="..\FoodRecognitionApp.Services.Abstraction\FoodRecognitionApp.Services.Abstraction.csproj" />
   </ItemGroup>

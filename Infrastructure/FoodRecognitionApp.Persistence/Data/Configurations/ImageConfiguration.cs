@@ -1,4 +1,5 @@
 ﻿using FoodRecognitionApp.Domain.Entities;
+using FoodRecognitionApp.Persistence.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -15,9 +16,10 @@ namespace FoodRecognitionApp.Persistence.Data.Configurations
 
             builder.Property(I => I.UploadTime).HasDefaultValueSql("GETDATE()");
 
-            builder.HasOne(I => I.UserAccount)
+            builder.HasOne<UserAccount>()
                    .WithMany(U => U.Images)
-                   .HasForeignKey(I => I.UserId);
+                   .HasForeignKey(I => I.UserId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
