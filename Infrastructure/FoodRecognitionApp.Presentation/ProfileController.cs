@@ -1,42 +1,37 @@
-﻿using FoodRecognitionApp.Domain.Exceptions.UnAuthorized;
-using FoodRecognitionApp.Services.Abstraction;
+﻿using FoodRecognitionApp.Services.Abstraction.Profile;
 using FoodRecognitionApp.Shared.Dtos.Profile;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FoodRecognitionApp.Presentation
 {
-    [ApiController]
-    [Route("api/[controller]")]
     [Authorize]
-    public class ProfileController(IServiceManager _serviceManager) : ControllerBase
+    public class ProfileController(IProfileService _profileService) : ApiBaseController
     {
         [HttpPost("setup")]
-        public async Task<IActionResult> CreateProfile(CreateProfileRequest request)
+        [ProducesResponseType(typeof(CreateProfileResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<CreateProfileResponse>> CreateProfile(CreateProfileRequest request, CancellationToken ct)
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdString == null) throw new UnAuthorizedException("You are Not Authorized ");
-            var userId = int.Parse(userIdString);
-
-            var result = await _serviceManager.ProfileService.CreateProfileAsync(userId, request);
-            return Ok(result);
+            var userId = GetUserIdFromToken();
+            var result = await _profileService.CreateProfileAsync(userId, request, ct);
+            return ToActionResult(result);
         }
-
-
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateProfile(CreateProfileRequest request)
+        [ProducesResponseType(typeof(CreateProfileResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<CreateProfileResponse>> UpdateProfile(CreateProfileRequest request, CancellationToken ct)
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdString == null) throw new UnAuthorizedException("You are Not Authorized ");
-            var userId = int.Parse(userIdString);
-
-            await _serviceManager.ProfileService.UpdateProfileAsync(userId, request);
-            return Ok("Profile Updated Successfully");
+            var userId = GetUserIdFromToken();
+            var result = await _profileService.UpdateProfileAsync(userId, request, ct);
+            return ToActionResult(result);
         }
     }
 }

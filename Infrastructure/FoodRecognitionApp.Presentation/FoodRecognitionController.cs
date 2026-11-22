@@ -1,7 +1,9 @@
 ﻿using FoodRecognitionApp.Domain.Exceptions.UnAuthorized;
 using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Services.Abstraction.FoodRecognition;
 using FoodRecognitionApp.Shared.Dtos.FoodRecognition;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,35 +13,31 @@ using System.Threading.Tasks;
 
 namespace FoodRecognitionApp.Presentation
 {
-    [ApiController]
-    [Route("api/[controller]")]
     [Authorize]
-    public class FoodRecognitionController(IServiceManager _serviceManager) : ControllerBase
+    public class FoodRecognitionController(IFoodRecognitionService _foodRecognitionService) : ApiBaseController
     {
         [HttpPost("recognize")]
-        public async Task<IActionResult> RecognizeFood(FoodRecognitionRequest request)
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(FoodRecognitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<FoodRecognitionResponse>> RecognizeFood([FromForm] FoodRecognitionRequest request, CancellationToken ct = default)
         {
-            var userId = GetCurrentUserId();
+            var userId = GetUserIdFromToken();
 
-            var result = await _serviceManager.FoodRecognitionService.RecognizeFoodAsync(userId, request);
-            return Ok(result);
+            var result = await _foodRecognitionService.RecognizeFoodAsync(userId, request, ct);
+            return ToActionResult(result);
         }
 
         [HttpGet("recent")]
-        public async Task<IActionResult> GetRecentRecogntions()
+        [ProducesResponseType(typeof(ICollection<RecentRecognitionResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ICollection<RecentRecognitionResponse>>> GetRecentRecogntions(CancellationToken ct = default)
         {
-            var userId = GetCurrentUserId();
+            var userId = GetUserIdFromToken();
 
-            var result = await _serviceManager.FoodRecognitionService.GetRecentRecognitionsAsync(userId);
-            return Ok(result);
+            var result = await _foodRecognitionService.GetRecentRecognitionsAsync(userId, ct);
+            return ToActionResult(result);
         }
 
 
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim is null) throw new UnAuthorizedException("You are not Authorized");
-            return int.Parse(userIdClaim.Value);
-        }
     }
 }

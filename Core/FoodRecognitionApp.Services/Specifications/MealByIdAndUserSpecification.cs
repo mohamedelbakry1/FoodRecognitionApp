@@ -5,9 +5,9 @@ using System.Text;
 
 namespace FoodRecognitionApp.Services.Specifications
 {
-    public class MealByIdAndUserSpecification : BaseSpecification<int , Meal>
+    internal class MealByIdAndUserSpecification : BaseSpecification<int , Meal>
     {
-        public MealByIdAndUserSpecification(int userId, int mealId) : base(M => M.UserId == userId && M.Id == mealId)  
+        public MealByIdAndUserSpecification(Guid userId, int mealId) : base(M => M.UserId == userId && M.Id == mealId)  
         {
             
         }

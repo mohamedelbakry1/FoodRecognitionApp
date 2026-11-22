@@ -1,74 +1,102 @@
-using FoodRecognitionApp.Domain.Exceptions.UnAuthorized;
-using FoodRecognitionApp.Services.Abstraction;
+using FoodRecognitionApp.Services.Abstraction.Reports;
+using FoodRecognitionApp.Shared.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FoodRecognitionApp.Presentation
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ReportController(IServiceManager _serviceManager) : ControllerBase
+    public class ReportController(IReportService _reportService) : ApiBaseController
     {
         [HttpGet("system-overview")]
-        public async Task<IActionResult> GetSystemOverviewReport()
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetSystemOverviewReport(CancellationToken ct)
         {
-            var pdf = await _serviceManager.ReportService.GenerateSystemOverviewReportAsync();
-            return File(pdf, "application/pdf", "SystemOverviewReport.pdf");
+            var result = await _reportService.GenerateSystemOverviewReportAsync(ct);
+            if (result.IsFailure)
+                return ToActionResult((Result)result);
+
+            return File(result.Value, "application/pdf", "SystemOverviewReport.pdf");
         }
 
         [HttpGet("food-recognition")]
-        public async Task<IActionResult> GetFoodRecognitionReport()
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetFoodRecognitionReport(CancellationToken ct)
         {
-            var pdf = await _serviceManager.ReportService.GenerateFoodRecognitionReportAsync();
-            return File(pdf, "application/pdf", "FoodRecognitionReport.pdf");
+            var result = await _reportService.GenerateFoodRecognitionReportAsync(ct);
+            if (result.IsFailure)
+                return ToActionResult((Result)result);
+
+            return File(result.Value, "application/pdf", "FoodRecognitionReport.pdf");
         }
 
         [HttpGet("user-demographics")]
-        public async Task<IActionResult> GetUserDemographicsReport()
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetUserDemographicsReport(CancellationToken ct)
         {
-            var pdf = await _serviceManager.ReportService.GenerateUserDemographicsReportAsync();
-            return File(pdf, "application/pdf", "UserDemographicsReport.pdf");
+            var result = await _reportService.GenerateUserDemographicsReportAsync(ct);
+            if (result.IsFailure)
+                return ToActionResult((Result)result);
+
+            return File(result.Value, "application/pdf", "UserDemographicsReport.pdf");
         }
 
         [Authorize]
         [HttpGet("user-history")]
-        public async Task<IActionResult> GetUserRecognitionHistoryReport()
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetUserRecognitionHistoryReport(CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            var pdf = await _serviceManager.ReportService.GenerateUserRecognitionHistoryReportAsync(userId);
-            return File(pdf, "application/pdf", "UserRecognitionHistoryReport.pdf");
+            var userId = GetUserIdFromToken();
+            var result = await _reportService.GenerateUserRecognitionHistoryReportAsync(userId, ct);
+            if (result.IsFailure)
+                return ToActionResult((Result)result);
+
+            return File(result.Value, "application/pdf", "UserRecognitionHistoryReport.pdf");
         }
 
         [HttpGet("nutritional-insights")]
-        public async Task<IActionResult> GetNutritionalInsightsReport()
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetNutritionalInsightsReport(CancellationToken ct)
         {
-            var pdf = await _serviceManager.ReportService.GenerateNutritionalInsightsReportAsync();
-            return File(pdf, "application/pdf", "NutritionalInsightsReport.pdf");
+            var result = await _reportService.GenerateNutritionalInsightsReportAsync(ct);
+            if (result.IsFailure)
+                return ToActionResult((Result)result);
+
+            return File(result.Value, "application/pdf", "NutritionalInsightsReport.pdf");
         }
 
         [HttpGet("ai-performance")]
-        public async Task<IActionResult> GetAiPerformanceReport()
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAiPerformanceReport(CancellationToken ct)
         {
-            var pdf = await _serviceManager.ReportService.GenerateAiPerformanceByCategoryReportAsync();
-            return File(pdf, "application/pdf", "AiPerformanceByCategoryReport.pdf");
+            var result = await _reportService.GenerateAiPerformanceByCategoryReportAsync(ct);
+            if (result.IsFailure)
+                return ToActionResult((Result)result);
+
+            return File(result.Value, "application/pdf", "AiPerformanceByCategoryReport.pdf");
         }
 
         [HttpGet("usage-trends")]
-        public async Task<IActionResult> GetUsageTrendsReport()
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetUsageTrendsReport(CancellationToken ct)
         {
-            var pdf = await _serviceManager.ReportService.GenerateUsageTrendsReportAsync();
-            return File(pdf, "application/pdf", "UsageTrendsReport.pdf");
-        }
+            var result = await _reportService.GenerateUsageTrendsReportAsync(ct);
+            if (result.IsFailure)
+                return ToActionResult((Result)result);
 
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim is null) throw new UnAuthorizedException("You are not Authorized");
-            return int.Parse(userIdClaim.Value);
+            return File(result.Value, "application/pdf", "UsageTrendsReport.pdf");
         }
     }
 }

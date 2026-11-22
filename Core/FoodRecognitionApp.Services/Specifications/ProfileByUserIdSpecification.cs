@@ -5,11 +5,11 @@ using System.Text;
 
 namespace FoodRecognitionApp.Services.Specifications
 {
-    public class ProfileByUserIdSpecification : BaseSpecification<int, UserProfile>
+    internal class ProfileByUserIdSpecification : BaseSpecification<int, UserProfile>
     {
-        public ProfileByUserIdSpecification(int userId) : base(P => P.AccountId == userId)
+        public ProfileByUserIdSpecification(Guid userId) : base(P => P.AccountId == userId)
         {
-            Includes.Add(P => P.UserAccount);
+
         }
     }
 }

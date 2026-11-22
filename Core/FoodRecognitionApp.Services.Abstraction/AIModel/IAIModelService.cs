@@ -1,4 +1,5 @@
-﻿using FoodRecognitionApp.Shared.Dtos.FoodRecognition;
+﻿using FoodRecognitionApp.Shared.Common;
+using FoodRecognitionApp.Shared.Dtos.FoodRecognition;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,6 @@ namespace FoodRecognitionApp.Services.Abstraction.AIModel
 {
     public interface IAIModelService
     {
-        Task<IEnumerable<AIModelResponse>?> ClassifyFoodAsync(IFormFile image);
+        Task<Result<ICollection<AIModelResponse>>> ClassifyFoodAsync(IFormFile image, CancellationToken ct = default);
     }
 }

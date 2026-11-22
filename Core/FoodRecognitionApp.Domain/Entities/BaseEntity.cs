@@ -6,6 +6,6 @@ namespace FoodRecognitionApp.Domain.Entities
 {
     public abstract class BaseEntity<TKey>
     {
-        public TKey Id { get; set; }
+        public TKey Id { get; set; } = default!;
     }
 }

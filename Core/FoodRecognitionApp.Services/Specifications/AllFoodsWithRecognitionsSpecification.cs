@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FoodRecognitionApp.Services.Specifications
 {
-    public class AllFoodsWithRecognitionsSpecification : BaseSpecification<int, Food>
+    internal class AllFoodsWithRecognitionsSpecification : BaseSpecification<int, Food>
     {
         public AllFoodsWithRecognitionsSpecification() : base(f => true)
         {

@@ -1,17 +1,18 @@
+using FoodRecognitionApp.Shared.Common;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FoodRecognitionApp.Services.Abstraction.Reports
 {
     public interface IReportService
     {
-        Task<byte[]> GenerateSystemOverviewReportAsync();
-        Task<byte[]> GenerateFoodRecognitionReportAsync();
-        Task<byte[]> GenerateUserDemographicsReportAsync();
-        Task<byte[]> GenerateUserRecognitionHistoryReportAsync(int userId);
-        Task<byte[]> GenerateNutritionalInsightsReportAsync();
-        Task<byte[]> GenerateAiPerformanceByCategoryReportAsync();
-        Task<byte[]> GenerateUsageTrendsReportAsync();
+        Task<Result<byte[]>> GenerateSystemOverviewReportAsync(CancellationToken ct = default);
+        Task<Result<byte[]>> GenerateFoodRecognitionReportAsync(CancellationToken ct = default);
+        Task<Result<byte[]>> GenerateUserDemographicsReportAsync(CancellationToken ct = default);
+        Task<Result<byte[]>> GenerateUserRecognitionHistoryReportAsync(Guid userId, CancellationToken ct = default);
+        Task<Result<byte[]>> GenerateNutritionalInsightsReportAsync(CancellationToken ct = default);
+        Task<Result<byte[]>> GenerateAiPerformanceByCategoryReportAsync(CancellationToken ct = default);
+        Task<Result<byte[]>> GenerateUsageTrendsReportAsync(CancellationToken ct = default);
     }
 }

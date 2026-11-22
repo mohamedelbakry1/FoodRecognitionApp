@@ -7,10 +7,10 @@ namespace FoodRecognitionApp.Shared.Dtos.Auth
 {
     public class RegisterRequest
     {
-        [Required(ErrorMessage = "User name is required")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "User name must be between 3 and 100 characters")]
-        [Display(Name = "User Name")]
-        public string UserName { get; set; } = null!;
+        [Required(ErrorMessage = "Display name is required")]
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Display name must be between 3 and 100 characters")]
+        [Display(Name = "Display Name")]
+        public string DisplayName { get; set; } = null!;
 
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid Email Format")]

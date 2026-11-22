@@ -1,4 +1,5 @@
-﻿using FoodRecognitionApp.Shared.Dtos.Profile;
+﻿using FoodRecognitionApp.Shared.Common;
+using FoodRecognitionApp.Shared.Dtos.Profile;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,9 +8,8 @@ namespace FoodRecognitionApp.Services.Abstraction.Profile
 {
     public interface IProfileService
     {
-        Task<CreateProfileResponse> CreateProfileAsync(int userId,CreateProfileRequest request);
-
-        Task UpdateProfileAsync(int userId, CreateProfileRequest request);
+        Task<Result<CreateProfileResponse>> CreateProfileAsync(Guid userId, CreateProfileRequest request, CancellationToken ct = default);
+        Task<Result<CreateProfileResponse>> UpdateProfileAsync(Guid userId, CreateProfileRequest request, CancellationToken ct = default);
 
     }
 }

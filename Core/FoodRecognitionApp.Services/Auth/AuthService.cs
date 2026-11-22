@@ -1,159 +1,143 @@
-﻿using FoodRecognitionApp.Domain.Entities;
-using FoodRecognitionApp.Domain.Exceptions.BadRequest;
-using FoodRecognitionApp.Domain.Exceptions.NotFound;
-using FoodRecognitionApp.Domain.Exceptions.UnAuthorized;
-using FoodRecognitionApp.Services.Abstraction.Auth;
+﻿using FoodRecognitionApp.Services.Abstraction.Auth;
 using FoodRecognitionApp.Services.Abstraction.Email;
-using FoodRecognitionApp.Shared;
+using FoodRecognitionApp.Shared.Common;
 using FoodRecognitionApp.Shared.Dtos.Auth;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace FoodRecognitionApp.Services.Auth
 {
-    public class AuthService(
-        UserManager<UserAccount> _userManager, 
-        IOptions<JwtOptions> options,
+    internal class AuthService(
+        IIdentityService _identityService,
+        ITokenService _tokenService,
         IEmailService _emailService,
+        ILogger<AuthService> _logger,
         IMemoryCache _memoryCache
-        ) : IAuthService
+    ) : IAuthService
     {
-        private static readonly Random _random = new Random();
-        public async Task<UserResponse?> LoginAsync(LoginRequest request)
+        private static readonly Random _random = new();
+        public async Task<Result<UserResponse>> LoginAsync(LoginRequest request, CancellationToken ct = default)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (request is null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                return Error.InvalidCredentials("Auth.InvalidCredentials", "The email or password is incorrect.");
 
-            if(user is null) throw new UserNotFoundException(request.Email);
+            var userResult = await _identityService.FindUserByEmailAsync(request.Email, ct);
+            if (userResult.IsFailure)
+                return Error.InvalidCredentials("Auth.InvalidCredentials", "The email or password is incorrect.");
 
-            var flag = await _userManager.CheckPasswordAsync(user, request.Password);
 
-            if (!flag) throw new UnAuthorizedException("You are not Authorized !!");
+            var passwordValid = await _identityService.CheckPasswordAsync(request.Email, request.Password, ct);
+            if (passwordValid.IsFailure || !passwordValid.Value)
+                return Error.InvalidCredentials("Auth.InvalidCredentials", "The email or password is incorrect.");
 
-            return new UserResponse()
-            {
-                UserName = user.UserName ?? "",
-                Email = user.Email ?? "",
-                Token = await GenerateTokenAsync(user)
-            };
-        }
-
-        public async Task<UserResponse?> RegisterAsync(RegisterRequest request)
-        {
-            var user = new UserAccount()
-            {
-                UserName = request.UserName,
-                Email = request.Email,
-            };
-
-            var result = await _userManager.CreateAsync(user, request.Password);
-
-            if(!result.Succeeded) throw new RegisterationBadRequestException(result.Errors.Select(E => E.Description).ToList());
-
-            return new UserResponse()
+            var user = userResult.Value;
+ 
+            var rolesResult = await _identityService.GetUserRolesAsync(user.Email, ct);
+            var roles = rolesResult.IsSuccess ? rolesResult.Value : Array.Empty<string>();
+            var token = _tokenService.GenerateToken(user.Id.ToString(), user.Email, user.UserName, roles);
+            return new UserResponse
             {
                 UserName = user.UserName,
                 Email = user.Email,
-                Token = await GenerateTokenAsync(user)
+                Token = token
             };
         }
-
-        public async Task<UserResponse?> GetCurrentUserAsync(string email)
+        public async Task<Result<UserResponse>> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user is null) throw new UserNotFoundException(email);
+            if (request is null)
+                return Error.Validation("Auth.InvalidRequest", "Registration data is required.");
 
-            return new UserResponse()
+            var createResult = await _identityService.CreateUserAsync(request, ct);
+            if (createResult.IsFailure)
+                return createResult.Errors.ToList();
+            var user = createResult.Value;
+
+            var rolesResult = await _identityService.GetUserRolesAsync(user.Email, ct);
+            var roles = rolesResult.IsSuccess ? rolesResult.Value : Array.Empty<string>();
+            var token = _tokenService.GenerateToken(user.Id.ToString(), user.Email, user.UserName, roles);
+
+            var emailResult = await _emailService.SendWelcomeEmailAsync(user.Email, user.DisplayName, ct);
+            if (emailResult.IsFailure)
             {
-                UserName = user.UserName ?? "",
-                Email = user.Email ?? "",
-                Token = await GenerateTokenAsync(user)
-            };
-        }
-
-        private async Task<string> GenerateTokenAsync(UserAccount user)
-        {
-            var authClaims = new List<Claim>()
-            {
-                new Claim(ClaimTypes.GivenName, user.UserName ?? ""),
-                new Claim(ClaimTypes.Email, user.Email ?? ""),
-                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? ""),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            };
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            foreach (var role in roles)
-            {
-                authClaims.Add(new Claim(ClaimTypes.Role, role));
+                var errorDetails = string.Join(" | ", emailResult.Errors.Select(e => $"{e.Code}: {e.Description}"));
+                _logger.LogWarning(
+                    $"User registered successfully (Id: {user.Id}, Email: {user.Email}), but welcome email failed to send. Reason: {errorDetails}");
             }
 
-            var jwtOptions = options.Value;
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey));
-
-            var token = new JwtSecurityToken(
-                issuer: jwtOptions.Issuer,
-                audience: jwtOptions.Audience,
-                expires: DateTime.Now.AddDays(jwtOptions.DurationInDays),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new UserResponse
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Token = token
+            };
         }
-
-        public async Task ForgotPasswordAsync(ForgotPasswordRequest request)
+        public async Task<Result<UserResponse>> GetCurrentUserAsync(Guid userId, CancellationToken ct = default)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user is null) throw new UserNotFoundException(request.Email);
+            var userResult = await _identityService.FindUserByIdAsync(userId, ct);
+            if (userResult.IsFailure)
+                return Error.NotFound("Auth.UserNotFound", "User with the specified ID does not exist.");
+
+            var user = userResult.Value;
+
+            var rolesResult = await _identityService.GetUserRolesAsync(user.Email, ct);
+            var roles = rolesResult.IsSuccess ? rolesResult.Value : Array.Empty<string>();
+
+            var token = _tokenService.GenerateToken(user.Id.ToString(), user.Email, user.UserName, roles);
+            return new UserResponse
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Token = token
+            };
+        }
+        public async Task<Result> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default)
+        {
+            if (request is null || string.IsNullOrWhiteSpace(request.Email))
+                return Error.Validation("Auth.InvalidEmail", "Email is required.");
+
+            var userResult = await _identityService.FindUserByEmailAsync(request.Email, ct);
+            if (userResult.IsFailure)
+                return Error.NotFound("Auth.UserNotFound", "User with the specified email does not exist.");
 
             var otp = _random.Next(100000, 999999).ToString();
-
             var cacheKey = GetOtpCacheKey(request.Email);
             _memoryCache.Set(cacheKey, otp, TimeSpan.FromMinutes(10));
-
-            await _emailService.SendOtpAsync(request.Email, otp);
+            await _emailService.SendOtpAsync(request.Email, otp, ct);
+            return Result.Ok();
         }
-
-        public bool VerifyOtp(VerifyOtpRequest request)
+        public Result VerifyOtp(VerifyOtpRequest request)
         {
-            ValidOtp(request.Email, request.Otp);
-            return true;
+            if (request is null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Otp))
+                return Error.Validation("Auth.InvalidOtp", "The provided OTP is invalid or has expired.");
+
+            return ValidateOtp(request.Email, request.Otp);
         }
-
-        public async Task ResetPasswordAsync(ResetPasswordRequest request)
+        public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default)
         {
-            ValidOtp(request.Email, request.Otp);
+            if (request is null)
+                return Error.Validation("Auth.InvalidRequest", "Request data is required.");
 
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user is null) throw new UserNotFoundException(request.Email);
+            var otpValidation = ValidateOtp(request.Email, request.Otp);
+            if (otpValidation.IsFailure)
+                return otpValidation;
 
-            var removedPassword = await _userManager.RemovePasswordAsync(user);
-            if(!removedPassword.Succeeded) throw new RemovePasswordBadRequestException();
-
-            var addPassword = await _userManager.AddPasswordAsync(user, request.Password);
-            if(!addPassword.Succeeded) throw new ResetPasswordBadRequestException(addPassword.Errors.Select(E => E.Description).ToList());
+            var resetResult = await _identityService.ResetPasswordAsync(request.Email, request.Password, ct);
+            if (resetResult.IsFailure)
+                return resetResult;
 
             _memoryCache.Remove(GetOtpCacheKey(request.Email));
+            return Result.Ok();
         }
-
-
-        private void ValidOtp(string email, string otp)
+        private Result ValidateOtp(string email, string otp)
         {
             var cacheKey = GetOtpCacheKey(email);
-
-            if (!_memoryCache.TryGetValue(cacheKey, out string? cachedOtp) || cachedOtp != otp) 
-                throw new InvalidOtpBadRequestException();
+            if (!_memoryCache.TryGetValue(cacheKey, out string? cachedOtp) || cachedOtp != otp)
+                return Error.Validation("Auth.InvalidOtp", "The provided OTP is invalid or has expired.");
+            return Result.Ok();
         }
-
         private static string GetOtpCacheKey(string email) => $"Otp {email}";
     }
 }
